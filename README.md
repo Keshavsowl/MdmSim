@@ -141,19 +141,30 @@ build/MdmSim
 ## Configuration
 
 MdmSim requires a JSON configuration file. The default example is
-`config/config.json`:
+`config/config.json`. The checked-in example is a forced reaction run; set
+`ReactionEnabled` to `false` for ordinary primary-beam tracking.
 
 ```json
 {
-    "Interactive": true,
+    "Interactive": false,
     "MarcoName": "run.mac",
     "ProcessNumber": 0,
     "BeamZ": 6,
     "BeamA": 12,
     "BeamCharge": 5,
     "BeamEnergyInMeV": 15.0,
-    "ReactionEnabled": false,
+    "ReactionEnabled": true,
     "ReactionProbability": 1.0,
+    "ReactionTargetZ": 1,
+    "ReactionTargetA": 1,
+    "ReactionLightZ": 1,
+    "ReactionLightA": 1,
+    "ReactionLightCharge": 1,
+    "ReactionLightExMeV": 0.0,
+    "ReactionHeavyZ": 6,
+    "ReactionHeavyA": 12,
+    "ReactionHeavyCharge": 5,
+    "ReactionHeavyExMeV": 0.0,
     "TargetRotationAngleInDeg": 0.0,
     "TargetThicknessInMgCm2": 159.0,
     "TdcResolutionInNs": 0.25,
@@ -161,8 +172,8 @@ MdmSim requires a JSON configuration file. The default example is
     "SiDetectorAngleInDeg": 90.0,
     "SiDetectorEnergyResolution": 0.1,
     "MdmAngleInDeg": 0.0,
-    "FirstMultipoleProbe": 3953.497476,
-    "DipoleProbe": 5568.3063039999997,
+    "DipoleProbe": 2338.0077369999999,
+    "FirstMultipoleProbe": 1659.9854929999999,
     "FieldMapDirectory": "../field",
     "MultipoleFieldMap": "Multipole.bin",
     "DipoleEntranceFieldMap": "DipoleEntrance.bin",
@@ -177,7 +188,8 @@ Configuration keys:
 
 - `Interactive`: `true` starts the Geant4 UI/visualization mode; `false` runs
   batch mode.
-- `MarcoName`: macro file used in batch mode, for example `run.mac`.
+- `MarcoName`: macro file used in batch mode, for example `run.mac`. The key is
+  spelled `MarcoName` in the current code and JSON file.
 - `ProcessNumber`: output index. `0` writes `SimData~0.root`.
 - `BeamZ`: atomic number of the primary ion. `6` means carbon.
 - `BeamA`: mass number of the primary ion. `12` with `BeamZ = 6` gives `12C`.
@@ -190,14 +202,15 @@ Configuration keys:
   multiple outgoing products can enter the spectrometer.
 - `BeamEnergyInMeV`: total kinetic energy of the primary ion in MeV.
 - `ReactionEnabled`: enables forced two-body reaction generation in the target.
-  The default is `false`, which preserves ordinary primary-beam tracking.
-  When enabled, add the reaction channel keys below. MdmSim samples one
-  reaction depth in the target for each selected matching primary beam ion,
-  kills the parent after the reaction, and tracks both outgoing products.
-  Unselected primaries pass through the target and can be transported through
-  MDM as the original beam. Product charge states are set manually from the
-  config; any charged product that reaches the slit or PPACs is analyzed with
-  its own `Z`, `A`, Geant4 mass, kinetic energy, and charge state.
+  If the key is omitted, the code defaults to `false`, which preserves ordinary
+  primary-beam tracking. When enabled, the reaction channel keys below are
+  required. MdmSim samples one reaction depth in the target for each selected
+  matching primary beam ion, kills that parent after the reaction, and tracks
+  both outgoing products. Unselected primaries pass through the target and can
+  be transported through MDM as the original beam. Product charge states are set
+  manually from the config; any charged product that reaches the slit or PPACs
+  is analyzed with its own `Z`, `A`, Geant4 mass, kinetic energy, and charge
+  state.
 - `ReactionProbability`: probability that a matching primary beam ion reacts
   in the target. `1.0` forces every matching primary to react; values below
   `1.0` allow unreacted primaries to pass through.
@@ -234,11 +247,13 @@ Example reaction block:
 - `TdcResolutionInNs`: TDC time resolution in ns.
 - `UseDeltaE`: enables or disables the dE silicon detector.
 - `SiDetectorAngleInDeg`: silicon telescope angle in degrees.
-- `SiDetectorEnergyResolution`: silicon detector energy resolution in percent.
-- `MdmAngleInDeg`: MDM spectrometer rotation angle in degrees. The primary
-  beam's horizontal angular distribution is centered on this value, so non-zero
-  MDM settings launch particles toward the rotated slit/collimator and
-  spectrometer field volumes.
+- `SiDetectorEnergyResolution`: fractional silicon detector energy-resolution
+  FWHM. For example, `0.1` means 10%.
+- `MdmAngleInDeg`: MDM spectrometer rotation angle in degrees. This rotates the
+  MDM geometry and configures the Raytrace comparison at the same angle. The
+  current primary generator emits the configured beam as a pencil beam along
+  global `+z`; it does not automatically steer the primary direction with this
+  value.
 - `FirstMultipoleProbe`: multipole hall-probe value. This must match the field
   map metadata.
 - `DipoleProbe`: dipole hall-probe value. This must match the field-map
