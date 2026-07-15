@@ -82,7 +82,7 @@ namespace MdmSim
         //
         SiDetectorHitsCollection *hcSlit = (SiDetectorHitsCollection *)hce->GetHC(fHCID_Slit);
         G4int nofHitsSlit = hcSlit->GetSize();
-        G4bool slitHitAccepted;
+        G4bool slitHitPresent;
         G4bool slitHitTransmitted;
         std::vector<G4int> slitHitTrackId;
         std::vector<G4double> slitHitLocalPosX;
@@ -98,7 +98,7 @@ namespace MdmSim
             // msg << "No hits in slit of this event found.\n";
             // G4Exception("\n---> EventAction::EndOfEventAction()",
             //             "MdmSimCode01", JustWarning, msg);
-            slitHitAccepted = false;
+            slitHitPresent = false;
             slitHitTransmitted = false;
             slitHitTrackId.push_back(-999);
             slitHitLocalPosX.push_back(-999.);
@@ -111,7 +111,7 @@ namespace MdmSim
         }
         else
         {
-            slitHitAccepted = true;
+            slitHitPresent = true;
             slitHitTransmitted = false;
             slitHitTrackId.push_back((*hcSlit)[0]->GetTrackID());
             G4ThreeVector slitLocalPos(0., 0., 0.);
@@ -168,6 +168,10 @@ namespace MdmSim
                     mdmPosY = fMdmTrace.GetFirstWireY() * 10.;
                     mdmAngX = fMdmTrace.GetFirstWireXAngle();
                     mdmAngY = fMdmTrace.GetFirstWireYAngle();
+                    if (std::abs(mdmPosX) < 200. && std::abs(mdmPosY) < 50.)
+                    {
+                        slitHitTransmitted = true;
+                    }
                     itTimes = 1;
                 }
             }
@@ -179,7 +183,7 @@ namespace MdmSim
             raytraceAngleX.push_back(mdmAngX / (double)itTimes);
             raytraceAngleY.push_back(mdmAngY / (double)itTimes);
         }
-        analysis->SetSlitHitAccepted(slitHitAccepted);
+        analysis->SetSlitHitPresent(slitHitPresent);
         analysis->SetSlitHitTransmitted(slitHitTransmitted);
         analysis->SetSlitHitTrackId(slitHitTrackId);
         analysis->SetSlitHitLocalPosX(slitHitLocalPosX);
@@ -385,8 +389,8 @@ namespace MdmSim
             siDeltaEHitTime.push_back(siDeltaETime / (double)itTimes);
             for (int i = 0; i < siDeltaEHitTrackId.size(); i++)
             {
-                siDeltaEHitEDepExp.push_back(G4RandGauss::shoot(siDeltaEHitEDep[i], fSiDetectorEnergyResolution * siDeltaEHitEDep[i] / 2.355));
-                siDeltaEHitTimeExp.push_back(siDeltaEHitTime[i] + G4RandFlat::shoot(-fTdcResolution, fTdcResolution));
+                siDeltaEHitEDepExp.push_back(G4RandGauss::shoot(siDeltaEHitEDep[i], fSiDetectorEnergyResolutionFwhmFraction * siDeltaEHitEDep[i] / 2.355));
+                siDeltaEHitTimeExp.push_back(siDeltaEHitTime[i] + G4RandFlat::shoot(-fTdcResolutionHalfWidth, fTdcResolutionHalfWidth));
             }
         }
         analysis->SetSiDeltaEHitAccepted(siDeltaEHitAccepted);
@@ -512,8 +516,8 @@ namespace MdmSim
             siEHitLocalMomentumZ.push_back(siELocalMomentum.z() / (double)itTimes);
             for (int i = 0; i < siEHitTrackId.size(); i++)
             {
-                siEHitEDepExp.push_back(G4RandGauss::shoot(siEHitEDep[i], fSiDetectorEnergyResolution * siEHitEDep[i] / 2.355));
-                siEHitTimeExp.push_back(siEHitTime[i] + G4RandFlat::shoot(-fTdcResolution, fTdcResolution));
+                siEHitEDepExp.push_back(G4RandGauss::shoot(siEHitEDep[i], fSiDetectorEnergyResolutionFwhmFraction * siEHitEDep[i] / 2.355));
+                siEHitTimeExp.push_back(siEHitTime[i] + G4RandFlat::shoot(-fTdcResolutionHalfWidth, fTdcResolutionHalfWidth));
                 G4int frontStripNo = std::floor((siEHitLocalPosX[i] + 2.5) / (5. / 16.));
                 G4int backStripNo = std::floor((siEHitLocalPosY[i] + 2.5) / (5. / 16.));
                 siEHitHorizontalNo.push_back(backStripNo);
@@ -813,15 +817,15 @@ namespace MdmSim
         G4cout << "\n---> EventAction::ParseParams():" << G4endl;
         for (auto it : params)
         {
-            if (it.first == "SiDetectorEnergyResolution")
+            if (it.first == "SiDetectorEnergyResolutionFwhmFraction")
             {
-                fSiDetectorEnergyResolution = it.second;
-                printf("Set: Si detector energy resolution = %.2f%%\n", fSiDetectorEnergyResolution * 100.);
+                fSiDetectorEnergyResolutionFwhmFraction = it.second;
+                printf("Set: Si detector energy resolution FWHM = %.2f%%\n", fSiDetectorEnergyResolutionFwhmFraction * 100.);
             }
-            else if (it.first == "TdcResolutionInNs")
+            else if (it.first == "TdcResolutionHalfWidthInNs")
             {
-                fTdcResolution = it.second * ns;
-                G4cout << "Set: TDC resolution = " << G4BestUnit(fTdcResolution, "Time") << G4endl;
+                fTdcResolutionHalfWidth = it.second * ns;
+                G4cout << "Set: TDC resolution half-width = " << G4BestUnit(fTdcResolutionHalfWidth, "Time") << G4endl;
             }
             else if (it.first == "FirstMultipoleProbe")
             {

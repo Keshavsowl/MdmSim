@@ -72,7 +72,6 @@ namespace MdmSim
         G4Triton::Triton();
         G4He3::He3();
         G4Alpha::Alpha();
-        FindConfiguredIon(fReactionParams);
     }
 
     void ReactionPhysics::ConstructProcess()

@@ -41,7 +41,7 @@ namespace MdmSim
         if (!fFactoryOn)
         {
             // Open a root file
-            std::string fileName = "SimData~" + processNumber + ".root";
+            std::string fileName = "SimData_" + processNumber + ".root";
             fFile = new TFile(fileName.c_str(), "RECREATE");
             if (!fFile)
             {
@@ -57,7 +57,7 @@ namespace MdmSim
             fTreeExperiment = new TTree("ExperimentalData", "Experimental data recorded by DAQ");
 
             // Add branches to trees
-            fTreeAccurate->Branch("SlitHitAccepted", &fSlitHitAccepted);
+            fTreeAccurate->Branch("SlitHitPresent", &fSlitHitPresent);
             fTreeAccurate->Branch("SlitHitTransmitted", &fSlitHitTransmitted);
             fTreeAccurate->Branch("SlitHitTrackId", &fSlitHitTrackId);
             fTreeAccurate->Branch("SlitHitLocalPosX", &fSlitHitLocalPosX);

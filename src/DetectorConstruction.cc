@@ -131,7 +131,6 @@ namespace MdmSim
         //
         // Target
         //
-        // G4Material *targetMaterial = new G4Material("Carbon", 2.253 * g / cm3, nist->FindOrBuildMaterial("G4_C"));
         G4Material *targetMaterial = nist->FindOrBuildMaterial("G4_Galactic");
         G4RotationMatrix *targetRot = new G4RotationMatrix;
         targetRot->rotateY(fTargetRotationAngle);
@@ -313,7 +312,7 @@ namespace MdmSim
         // PPAC
         //
         // PPAC chamber
-        G4Material *ppacChamberMaterial = new G4Material("Pentane", (0.00385 * fPpacVacuum / (133.32236842 * pascal) + 1.666e-5) * kg / m3, nist->FindOrBuildMaterial("G4_N-PENTANE"), kStateGas, 300. * kelvin, fPpacVacuum);
+        G4Material *ppacChamberMaterial = new G4Material("Pentane", (0.00385 * fPpacGasPressure / (133.32236842 * pascal) + 1.666e-5) * kg / m3, nist->FindOrBuildMaterial("G4_N-PENTANE"), kStateGas, 300. * kelvin, fPpacGasPressure);
         G4VSolid *solidPpacChamber = new G4Box("PpacChamberSolid", kPpacWidth / 2., kPpacHeight / 2., kPpacChamberLength / 2.);
         G4LogicalVolume *logicPpacChamber = new G4LogicalVolume(solidPpacChamber, ppacChamberMaterial, "PpacChamberLogical");
         G4ThreeVector solidPpacChamberTrans1(-kDipoleFieldRadius - kDipoleFieldRadius * std::cos(M_PI - kDipoleDeflectionAngle), 0., kDipoleFieldRadius * std::sin(M_PI - kDipoleDeflectionAngle));
@@ -584,10 +583,10 @@ namespace MdmSim
                 fDipoleProbe = it.second;
                 G4cout << "Set: Dipole probe = " << fDipoleProbe << " Gauss" << G4endl;
             }
-            else if (it.first == "PpacVacuumInTorr")
+            else if (it.first == "PpacGasPressureInTorr")
             {
-                fPpacVacuum = it.second * 133.32236842 * pascal;
-                G4cout << "Set: PPAC vacuum = " << G4BestUnit(fPpacVacuum, "Pressure") << G4endl;
+                fPpacGasPressure = it.second * 133.32236842 * pascal;
+                G4cout << "Set: PPAC gas pressure = " << G4BestUnit(fPpacGasPressure, "Pressure") << G4endl;
             }
             else if (it.first == "PpacLengthInCm")
             {

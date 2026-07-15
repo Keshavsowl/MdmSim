@@ -75,7 +75,7 @@ namespace MdmSim
         G4VPhysicalVolume *fPhysicDipoleMagnet = nullptr;
         G4LogicalVolume *fLogicRaytraceFocalPlane = nullptr;
 
-        G4double fPpacVacuum;
+        G4double fPpacGasPressure;
         G4double fPpacLength;
         G4RotationMatrix *fPpacChamberRot = nullptr;
         G4ThreeVector fPpacChamberPos;

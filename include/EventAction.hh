@@ -32,8 +32,8 @@ namespace MdmSim
         G4int fHCID_RaytraceFocalPlane;
         G4int fHCID_Ppac1;
         G4int fHCID_Ppac2;
-        G4double fSiDetectorEnergyResolution;
-        G4double fTdcResolution;
+        G4double fSiDetectorEnergyResolutionFwhmFraction;
+        G4double fTdcResolutionHalfWidth;
         G4double fMdmAngle = 0.;
         G4double fFirstMultipoleProbe = 0.;
         G4double fDipoleProbe = 0.;

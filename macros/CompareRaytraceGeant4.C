@@ -1,14 +1,14 @@
 // Compare Raytrace focal-plane output to the Geant4 track.
 //
 // Usage from the repository root:
-//   root -l -b -q 'macros/CompareRaytraceGeant4.C("build/SimData~99.root")'
+//   root -l -b -q 'macros/CompareRaytraceGeant4.C("build/SimData_99.root")'
 //
 // Source-selection examples:
 //   // Use the vacuum Raytrace focal-plane scorer.
-//   root -l -b -q 'macros/CompareRaytraceGeant4.C("SimData~93.root","compare_focal.root",-600,-489.99875,-89.99875,"AccurateData","raytrace")'
+//   root -l -b -q 'macros/CompareRaytraceGeant4.C("SimData_93.root","compare_focal.root",-600,-489.99875,-89.99875,"AccurateData","raytrace")'
 //
 //   // Use projection from PPAC1/PPAC2 hit positions.
-//   root -l -b -q 'macros/CompareRaytraceGeant4.C("SimData~93.root","compare_ppac.root",-600,-489.99875,-89.99875,"AccurateData","ppac")'
+//   root -l -b -q 'macros/CompareRaytraceGeant4.C("SimData_93.root","compare_ppac.root",-600,-489.99875,-89.99875,"AccurateData","ppac")'
 //
 // The Raytrace plane is expressed in the PPAC chamber local z coordinate, in mm.
 // In the current geometry the PPAC chamber center is placed 60 cm downstream of
@@ -347,7 +347,7 @@ double MaxAbsResidual(const std::vector<CompareRow>& rows, const Quantity& q) {
 
 }  // namespace
 
-void CompareRaytraceGeant4(const char* inputPath = "SimData~0.root",
+void CompareRaytraceGeant4(const char* inputPath = "SimData_0.root",
                            const char* outputPath = "raytrace_geant4_compare.root",
                            double raytracePlaneZLocalMm = -600.0,
                            double ppac1PlaneZLocalMm = -489.99875,
@@ -368,7 +368,7 @@ void CompareRaytraceGeant4(const char* inputPath = "SimData~0.root",
     return;
   }
 
-  bool slitRaytraceTransmitted = false;
+  bool slitHitTransmitted = false;
   bool raytraceFocalPlaneAccepted = false;
   bool ppac1Accepted = false;
   bool ppac2Accepted = false;
@@ -415,7 +415,7 @@ void CompareRaytraceGeant4(const char* inputPath = "SimData~0.root",
     return;
   }
 
-  tree->SetBranchAddress("SlitHitTransmitted", &slitRaytraceTransmitted);
+  tree->SetBranchAddress("SlitHitTransmitted", &slitHitTransmitted);
   tree->SetBranchAddress("SlitHitTrackId", &slitTrackId);
   tree->SetBranchAddress("Ppac1Accepted", &ppac1Accepted);
   tree->SetBranchAddress("Ppac2Accepted", &ppac2Accepted);
@@ -502,7 +502,7 @@ void CompareRaytraceGeant4(const char* inputPath = "SimData~0.root",
   for (Long64_t i = 0; i < entries; ++i) {
     tree->GetEntry(i);
 
-    if (!ppac1Accepted || !ppac2Accepted || !slitRaytraceTransmitted ||
+    if (!ppac1Accepted || !ppac2Accepted || !slitHitTransmitted ||
         !HasValue(raytraceX) || !HasValue(raytraceY) || !HasValue(raytraceAngleX) ||
         !HasValue(raytraceAngleY)) {
       ++skipped;

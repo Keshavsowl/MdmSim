@@ -23,8 +23,8 @@ namespace MdmSim
         void FillTreeAccurate();
         void FillTreeExperiment();
 
-        void SetSlitHitAccepted(G4bool acc) { fSlitHitAccepted = acc; };
-        void SetSlitHitTransmitted(G4bool tra) { fSlitHitTransmitted = tra; };
+        void SetSlitHitPresent(G4bool present) { fSlitHitPresent = present; };
+        void SetSlitHitTransmitted(G4bool transmitted) { fSlitHitTransmitted = transmitted; };
         void SetSlitHitTrackId(std::vector<G4int> &v) { fSlitHitTrackId = v; };
         void SetSlitHitLocalPosX(std::vector<G4double> &v) { fSlitHitLocalPosX = v; };
         void SetSlitHitLocalPosY(std::vector<G4double> &v) { fSlitHitLocalPosY = v; };
@@ -121,7 +121,7 @@ namespace MdmSim
         TTree *fTreeAccurate = nullptr;
         TTree *fTreeExperiment = nullptr;
         
-        G4bool fSlitHitAccepted;
+        G4bool fSlitHitPresent;
         G4bool fSlitHitTransmitted;
         std::vector<G4int> fSlitHitTrackId;
         std::vector<G4double> fSlitHitLocalPosX;

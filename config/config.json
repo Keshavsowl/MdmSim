@@ -1,37 +1,73 @@
 {
-    "Interactive": false,
-    "MarcoName": "run.mac",
-    "ProcessNumber": 0,
-    "BeamZ": 6,
-    "BeamA": 12,
-    "BeamCharge": 5,
-    "BeamEnergyInMeV": 15.0,
-    "ReactionEnabled": true,
-    "ReactionProbability": 1.0,
-    "ReactionTargetZ": 1,
-    "ReactionTargetA": 1,
-    "ReactionLightZ": 1,
-    "ReactionLightA": 1,
-    "ReactionLightCharge": 1,
-    "ReactionLightExMeV": 0.0,
-    "ReactionHeavyZ": 6,
-    "ReactionHeavyA": 12,
-    "ReactionHeavyCharge": 5,
-    "ReactionHeavyExMeV": 0.0,
-    "TargetRotationAngleInDeg": 0.0,
-    "TargetThicknessInMgCm2": 159.0,
-    "TdcResolutionInNs": 0.25,
-    "UseDeltaE": false,
-    "SiDetectorAngleInDeg": 90.0,
-    "SiDetectorEnergyResolution": 0.1,
-    "MdmAngleInDeg": 0.0,
-    "DipoleProbe": 2338.0077369999999,
-    "FirstMultipoleProbe": 1659.9854929999999,
-    "FieldMapDirectory": "../field",
-    "MultipoleFieldMap": "Multipole.bin",
-    "DipoleEntranceFieldMap": "DipoleEntrance.bin",
-    "DipoleSectorFieldMap": "DipoleSector.bin",
-    "DipoleExitFieldMap": "DipoleExit.bin",
-    "PpacVacuumInTorr": 4.0,
-    "PpacLengthInCm": 40.0
+  // Run mode.
+  "Interactive": false,
+
+  // Geant4 macro used in batch mode.
+  // This path is interpreted from the working directory, normally build/,
+  // where CMake copies run.mac.
+  "MacroName": "run.mac",
+
+  // Job index used in the output filename and in automatic seed mixing.
+  "ProcessNumber": 0,
+
+  // Primary beam.
+  "BeamZ": 6,
+  "BeamA": 12,
+  "BeamCharge": 5,                 // charge state Q, in units of e
+  "BeamEnergyInMeV": 15.0,         // MeV kinetic energy
+
+  // Forced relativistic two-body reaction.
+  "ReactionEnabled": true,
+  "ReactionProbability": 1.0,      // range: 0 to 1
+
+  "ReactionTargetZ": 1,
+  "ReactionTargetA": 1,
+
+  "ReactionLightZ": 1,
+  "ReactionLightA": 1,
+  "ReactionLightCharge": 1,        // charge state, in units of e
+  "ReactionLightExMeV": 0.0,       // MeV excitation energy
+
+  "ReactionHeavyZ": 6,
+  "ReactionHeavyA": 12,
+  "ReactionHeavyCharge": 5,        // charge state, in units of e
+  "ReactionHeavyExMeV": 0.0,       // MeV excitation energy
+
+  // Virtual target geometry.
+  // The current target material is G4_Galactic.
+  // TargetThicknessInMgCm2 is converted to a geometrical thickness
+  // using 2.253 g/cm^3; real target energy loss is not modeled.
+  "TargetRotationAngleInDeg": 0.0, // deg
+  "TargetThicknessInMgCm2": 159.0, // mg/cm^2
+
+  // Uniform time smearing:
+  // measured time = true time + Uniform(-halfWidth, +halfWidth).
+  "TdcResolutionHalfWidthInNs": 0.25, // ns
+
+  "UseDeltaE": false,
+  "SiDetectorAngleInDeg": 90.0,    // deg
+
+  // Fractional FWHM of the Gaussian silicon-energy resolution.
+  // 0.10 means 10% FWHM; sigma = 0.10 * E / 2.355.
+  "SiDetectorEnergyResolutionFwhmFraction": 0.10,
+
+  // Rotation of the MDM geometry around the target.
+  // The primary beam itself is generated along +z.
+  "MdmAngleInDeg": 0.0,            // deg
+
+  // Requested hall-probe settings. These must agree with the metadata
+  // embedded in all four field maps.
+  "DipoleProbe": 2338.00,          // Gauss
+  "FirstMultipoleProbe": 1659.98,  // Gauss
+
+  // FieldMapDirectory is resolved relative to config/config.json.
+  "FieldMapDirectory": "../field",
+  "MultipoleFieldMap": "Multipole.bin",
+  "DipoleEntranceFieldMap": "DipoleEntrance.bin",
+  "DipoleSectorFieldMap": "DipoleSector.bin",
+  "DipoleExitFieldMap": "DipoleExit.bin",
+
+  // PPAC working-gas pressure and cathode spacing.
+  "PpacGasPressureInTorr": 4.0,     // Torr
+  "PpacLengthInCm": 40.0            // cm
 }

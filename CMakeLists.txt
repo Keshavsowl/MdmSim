@@ -7,7 +7,6 @@ project(MdmSim)
 # Setup the compiler
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_BUILD_TYPE "debug")
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -Wall -g2 -ggdb")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -Wall")
 enable_language(Fortran)
@@ -19,7 +18,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
 # to build a batch mode only executable
 #
-option(WITH_GEANT4_UIVIS "Geant4 simulation for TexPPAC" ON)
+option(WITH_GEANT4_UIVIS "Build with Geant4 UI and visualization" ON)
 
 if(WITH_GEANT4_UIVIS)
     find_package(Geant4 REQUIRED ui_all vis_all)
@@ -53,6 +52,9 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh ${PROJECT_SOURCE_DIR}/inclu
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(MdmSim MdmSim.cc ${sources} ${headers})
+if(WITH_GEANT4_UIVIS)
+    target_compile_definitions(MdmSim PRIVATE MDMSIM_USE_UIVIS)
+endif()
 target_link_libraries(MdmSim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 # ----------------------------------------------------------------------------
