@@ -1,5 +1,6 @@
 #include "DetectorConstruction.hh"
 #include "SiDetectorSD.hh"
+#include "NaIDetectorSD.hh"
 #include "PpacSD.hh"
 #include "TrackingPlaneSD.hh"
 #include "Constants.hh"
@@ -93,6 +94,39 @@ namespace MdmSim
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+    //Store Silcon detector positions
+    void DetectorConstruction::SetSiliconDetectors(
+		    const std::vector<DetectorPosition>& positions)
+    {
+	    fSiliconDetectors = positions;
+    }
+    //Store NaI detector Positions
+    void DetectorConstruction::SetNaIDetectors(
+		    const std::vector<DetectorPosition>& positions)
+    { 
+	    fNaIDetectors = positions;
+	    fUseNaI = !positions.empty();
+    }
+
+    void DetectorConstruction::SetNaIGeometry(
+		    G4bool enabled,
+		    G4double halfX,
+		    G4double halfY,
+		    G4double halfZ,
+		    G4double alWall)
+
+    {
+	    fUseNaI = enabled;
+	    fNaICrystalHalfX = halfX;
+	    fNaICrystalHalfY = halfY;
+	    fNaICrystalHalfZ = halfZ;
+
+	    fNaIAlWall = alWall;
+    }
+
+
+
+
     G4VPhysicalVolume *DetectorConstruction::Construct()
     {
         // Get nist material manager
@@ -156,7 +190,7 @@ namespace MdmSim
                           checkOverlaps);  // overlaps checking
 
         logicTarget->SetUserLimits(new G4UserLimits(0.1 * targetDz));
-
+        /*
         //
         // Si detector - Delta E
         //
@@ -191,10 +225,75 @@ namespace MdmSim
                           checkOverlaps);     // overlaps checking
 
         logicDeltaE->SetUserLimits(new G4UserLimits(0.5 * DeltaEZ));
+*/
+//
+// Micron S2 Annular silicon detectors
+//
+        for (const auto &s2 : fSiliconDetectors)
+	{
+		//Skip detector if disabled in Json
+		if (!s2.enabled)
+			continue;
 
+		// Full thickness must be positive
+		if (s2.thickness <=0.)
+		{
+			G4Exception(
+					"DetectorConstruction::Construct",
+					"InvalidS2Thickness",
+					FatalException,
+					"Enabled s2 detector must have positive thickness."
+				   );
+		}
+
+		// S2 annular geometry
+		G4Tubs *solidS2 = new G4Tubs(
+				"S2ActiveSolid",
+				1.10 * cm,
+				3.50 * cm,
+				s2.thickness / 2.0,
+				0.0 * deg,
+				360.0 * deg
+				);
+
+		// Silicon Material
+		G4LogicalVolume *logicS2 = new G4LogicalVolume(
+				solidS2,
+				nist -> FindOrBuildMaterial("G4_Si"),
+				"SiDetectorE"
+				);
+		//Position from Json
+		G4ThreeVector s2Pos(s2.x , s2.y, s2.z);
+
+		//The S2 plane is perpendicular to +Z
+		new G4PVPlacement(
+				nullptr,
+				s2Pos,
+				logicS2,
+				"SiDetectorE",
+				logicWorld,
+				false,
+				s2.copyNo,
+				true
+				);
+		logicS2->SetUserLimits(new G4UserLimits(s2.thickness / 10.0)
+				);
+
+		G4cout << "Constructed S2 detector "
+			<<s2.copyNo
+			<<" at Z = " << s2.z /cm
+			<<"cm, thickness = "
+			<<s2.thickness /um
+			<<" um" << G4endl;
+	}
+
+
+
+
+/*
         //
         // Si detector - E
-        //
+        
         G4ThreeVector EPos = G4ThreeVector(0., 0., 14.224 * cm);
         EPos.setTheta(fSiDetectorAngle);
         EPos.setPhi(180. * deg);
@@ -205,7 +304,7 @@ namespace MdmSim
         G4double EX = 5. * cm;
         G4double EY = 5. * cm;
         G4double EZ = 500. * um;
-
+     
         G4Box *solidE =
             new G4Box("DetdE",
                       0.5 * EX, 0.5 * EY, 0.5 * EZ);
@@ -214,19 +313,122 @@ namespace MdmSim
             new G4LogicalVolume(solidE,                             // its solid
                                 nist->FindOrBuildMaterial("G4_Si"), // its material
                                 "SiDetectorE");                     // its name
+        
+       G4double siRadius = 14.224 * cm;
+       G4double siTheta = 90.0 * deg;
+       
+       for (G4int i=0; i < 6; i++)
+       {
+	G4double siPhi = i*60.0*deg;
+	G4ThreeVector EPos(0., 0., siRadius);
+	EPos.setTheta(siTheta);
+	EPos.setPhi(siPhi);
+	G4RotationMatrix *ERot = new G4RotationMatrix();
+        ERot->rotateY(siTheta);
+	ERot->rotateZ(siPhi);
+
 
         new G4PVPlacement(ERot,           // rotation
                           EPos,           // at position
                           logicE,         // its logical volume
                           "SiDetectorE",  // its name
                           logicWorld,     // its mother  volume
-                          false,          // no boolean operation
-                          0,              // copy number
+                          false,          // no boolean operation       
+		          i,  	  // copy number
                           checkOverlaps); // overlaps checking
-
+        }
         logicE->SetUserLimits(new G4UserLimits(0.5 * EZ));
-
+*/
         //
+	//
+	//NaI  Gamma detectors  - Hyperion Array
+	//
+	if (fUseNaI)
+	{
+		//Material
+		G4Material *naiMaterial = nist->FindOrBuildMaterial("G4_SODIUM_IODIDE");
+		G4Material *alMaterial = nist->FindOrBuildMaterial("G4_Al");
+
+		// NaI crystal dimension from JSON
+		G4Box *solidNaI = new G4Box(
+				"NaICrystalSolid",
+				fNaICrystalHalfX,
+				fNaICrystalHalfY,
+				fNaICrystalHalfZ
+				);
+		G4LogicalVolume *logicNaI = new G4LogicalVolume(
+				solidNaI,
+				naiMaterial,
+				"NaICrystalLogical");
+		// Aluminum housing enclosing the NaI crystal
+
+		G4Box *solidNaIBox = new G4Box(
+				"NaIBoxSolid",
+				fNaICrystalHalfX + fNaIAlWall,
+				fNaICrystalHalfY + fNaIAlWall,
+				fNaICrystalHalfZ + fNaIAlWall
+				);
+		          G4LogicalVolume *logicNaIBox =
+                new G4LogicalVolume(
+                    solidNaIBox,
+                    alMaterial,
+                    "NaIBoxLogical"
+                );
+
+            // Place the crystal inside its aluminum housing
+            new G4PVPlacement(
+                nullptr,
+                G4ThreeVector(0., 0., 0.),
+                logicNaI,
+                "NaICrystal",
+                logicNaIBox,
+                false,
+                0,
+                checkOverlaps
+            );
+
+            // Place all enabled NaI detectors
+	    for (const auto &nai : fNaIDetectors)
+	    {
+		    //Skip all disabled detectors
+		    if (!nai.enabled)
+			    continue;
+
+		    //Position from Hyperion JSON
+		    G4ThreeVector naiPos(
+				    nai.x,
+				    nai.y,
+				    nai.z
+				    );
+		    // Rotation from Hyperion Json
+		    G4RotationMatrix *naiRot = new G4RotationMatrix();
+		    naiRot->rotateZ(nai.rotZ);
+		    naiRot->rotateY(nai.rotY);
+		    naiRot->rotateX(nai.rotX);
+
+		    // Place the aluminum housing in the world
+		    new G4PVPlacement(
+				    naiRot,
+				    naiPos,
+				    logicNaIBox,
+				    "NaIBox",
+				    logicWorld,
+				    false,
+				    nai.copyNo,
+				    checkOverlaps
+				    );
+		    G4cout<< "Constructed NaI detector" 
+			    << nai.copyNo 
+			    << "at ("
+			    << nai.x / cm <<  " , "
+			    << nai.y / cm <<  " , "
+			    << nai.z / cm <<  ") cm "
+			    << G4endl;
+	   
+	    }
+        }
+
+
         // MDM slit and slit box
         //
         G4ThreeVector slitBoxPos = G4ThreeVector(0., 0., kSlitBoxPos); // position in mother frame
@@ -404,9 +606,19 @@ namespace MdmSim
         G4SDManager::GetSDMpointer()->AddNewDetector(aSiDetectorESD);
         SetSensitiveDetector("SiDetectorE", aSiDetectorESD, true);
 
-        SiDetectorSD *aSiDetectorDeltaESD = new SiDetectorSD("MdmSim/SiDetectorDeltaESD", "SiDetectorDeltaEHitsCollection");
-        G4SDManager::GetSDMpointer()->AddNewDetector(aSiDetectorDeltaESD);
-        SetSensitiveDetector("SiDetectorDeltaE", aSiDetectorDeltaESD, true);
+	//NaI gamma detectors
+	if (fUseNaI)
+	{
+		NaIDetectorSD *aNaISD = new NaIDetectorSD("MdmSim/NaIDetectorSD","NaIHitsCollection");
+
+		G4SDManager::GetSDMpointer()->AddNewDetector(aNaISD);
+
+		SetSensitiveDetector("NaICrystalLogical", aNaISD, true);
+	}
+
+       // SiDetectorSD *aSiDetectorDeltaESD = new SiDetectorSD("MdmSim/SiDetectorDeltaESD", "SiDetectorDeltaEHitsCollection");
+       // G4SDManager::GetSDMpointer()->AddNewDetector(aSiDetectorDeltaESD);
+       // SetSensitiveDetector("SiDetectorDeltaE", aSiDetectorDeltaESD, true);
 
         SiDetectorSD *aSlitSD = new SiDetectorSD("MdmSim/SlitSD", "SlitHitsCollection");
         G4SDManager::GetSDMpointer()->AddNewDetector(aSlitSD);

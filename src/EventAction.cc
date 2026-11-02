@@ -48,10 +48,18 @@ namespace MdmSim
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
     void EventAction::BeginOfEventAction(const G4Event *)
-    {
+    {   
+	Analysis *analysis = Analysis::Instance();
+	
+
+	analysis->ResetAlpha1Generated();
+	analysis->ResetAlpha2Generated();
+	analysis->ResetGammaGenerated();
+
         G4SDManager *sdManager = G4SDManager::GetSDMpointer();
-        fHCID_SiDetectorDeltaE = sdManager->GetCollectionID("SiDetectorDeltaEHitsCollection");
+        //fHCID_SiDetectorDeltaE = sdManager->GetCollectionID("SiDetectorDeltaEHitsCollection");
         fHCID_SiDetectorE = sdManager->GetCollectionID("SiDetectorEHitsCollection");
+	fHCID_NaI = sdManager->GetCollectionID("NaIHitsCollection");
         fHCID_Slit = sdManager->GetCollectionID("SlitHitsCollection");
         fHCID_RaytraceFocalPlane = sdManager->GetCollectionID("RaytraceFocalPlaneHitsCollection");
         fHCID_Ppac1 = sdManager->GetCollectionID("Ppac1HitsCollection");
@@ -338,67 +346,9 @@ namespace MdmSim
         analysis->SetRaytraceFocalPlaneHitLocalMomentumZ(raytraceFocalPlaneHitLocalMomentumZ);
 
         //
-        // Delta E
-        SiDetectorHitsCollection *hcSiDetectorDeltaE = (SiDetectorHitsCollection *)hce->GetHC(fHCID_SiDetectorDeltaE);
-        G4int nofHitsSiDetectorDeltaE = hcSiDetectorDeltaE->GetSize();
-        G4bool siDeltaEHitAccepted;
-        std::vector<G4int> siDeltaEHitTrackId;
-        std::vector<G4double> siDeltaEHitEDep;
-        std::vector<G4double> siDeltaEHitTime;
-        std::vector<G4double> siDeltaEHitEDepExp;
-        std::vector<G4double> siDeltaEHitTimeExp;
-        if (nofHitsSiDetectorDeltaE == 0)
-        {
-            // G4ExceptionDescription msg;
-            // msg << "No hits in Si detector Delta-E of this event found.\n";
-            // G4Exception("\n---> EventAction::EndOfEventAction()",
-            //             "MdmSimCode01", JustWarning, msg);
-            siDeltaEHitAccepted = false;
-            siDeltaEHitTrackId.push_back(-99);
-            siDeltaEHitEDep.push_back(-99.);
-            siDeltaEHitTime.push_back(-99.);
-            siDeltaEHitEDepExp.push_back(-99.);
-            siDeltaEHitTimeExp.push_back(-99.);
-        }
-        else
-        {
-            siDeltaEHitAccepted = true;
-            siDeltaEHitTrackId.push_back((*hcSiDetectorDeltaE)[0]->GetTrackID());
-            G4double siDeltaEeDep = 0.;
-            G4double siDeltaETime = 0.;
-            G4int itTimes = 0;
-            for (int i = 0; i < nofHitsSiDetectorDeltaE; i++)
-            {
-                if ((*hcSiDetectorDeltaE)[i]->GetTrackID() == siDeltaEHitTrackId.back())
-                {
-                    siDeltaEeDep += (*hcSiDetectorDeltaE)[i]->GetEnergyDeposit();
-                    siDeltaETime += (*hcSiDetectorDeltaE)[i]->GetTime();
-                    itTimes += 1;
-                }
-                else
-                {
-                    siDeltaEHitTrackId.push_back((*hcSiDetectorDeltaE)[i]->GetTrackID());
-                    siDeltaEHitEDep.push_back(siDeltaEeDep);
-                    siDeltaEHitTime.push_back(siDeltaETime / (double)itTimes);
-                    siDeltaEeDep = (*hcSiDetectorDeltaE)[i]->GetEnergyDeposit();
-                    siDeltaETime = (*hcSiDetectorDeltaE)[i]->GetTime();
-                    itTimes = 1;
-                }
-            }
-            siDeltaEHitEDep.push_back(siDeltaEeDep);
-            siDeltaEHitTime.push_back(siDeltaETime / (double)itTimes);
-            for (int i = 0; i < siDeltaEHitTrackId.size(); i++)
-            {
-                siDeltaEHitEDepExp.push_back(G4RandGauss::shoot(siDeltaEHitEDep[i], fSiDetectorEnergyResolutionFwhmFraction * siDeltaEHitEDep[i] / 2.355));
-                siDeltaEHitTimeExp.push_back(siDeltaEHitTime[i] + G4RandFlat::shoot(-fTdcResolutionHalfWidth, fTdcResolutionHalfWidth));
-            }
-        }
-        analysis->SetSiDeltaEHitAccepted(siDeltaEHitAccepted);
-        analysis->SetSiDeltaEHitTrackId(siDeltaEHitTrackId);
-        analysis->SetSiDeltaEHitEDep(siDeltaEHitEDep);
-        analysis->SetSiDeltaEHitTime(siDeltaEHitTime);
-        analysis->SetSiDeltaEHitEDepExp(siDeltaEHitEDepExp);
-        analysis->SetSiDeltaEHitTimeExp(siDeltaEHitTimeExp);
+        // Micron S2 Annular Silicon detectors
+	// S2-1: front detector (CopyNo =0)
+	// S2-2: Rear Detector (CopyNo =1)
 
         //
         // E
@@ -406,6 +356,7 @@ namespace MdmSim
         G4int nofHitsSiDetectorE = hcSiDetectorE->GetSize();
         G4bool siEHitAccepted;
         std::vector<G4int> siEHitTrackId;
+	std::vector<G4int> siEHitCopyNo;
         std::vector<G4double> siEHitEDep;
         std::vector<G4double> siEHitTime;
         std::vector<G4double> siEHitGlobalPosX;
@@ -432,6 +383,7 @@ namespace MdmSim
             //             "MdmSimCode01", JustWarning, msg);
             siEHitAccepted = false;
             siEHitTrackId.push_back(-99);
+	    siEHitCopyNo.push_back(-99);
             siEHitEDep.push_back(-99.);
             siEHitTime.push_back(-99.);
             siEHitGlobalPosX.push_back(-99.);
@@ -455,6 +407,7 @@ namespace MdmSim
         {
             siEHitAccepted = true;
             siEHitTrackId.push_back((*hcSiDetectorE)[0]->GetTrackID());
+	    siEHitCopyNo.push_back((*hcSiDetectorE)[0]->GetCopyNo());
             G4double siEeDep = 0.;
             G4double siETime = 0.;
             G4ThreeVector siEGlobalPos(0., 0., 0.);
@@ -464,7 +417,8 @@ namespace MdmSim
             G4int itTimes = 0;
             for (int i = 0; i < nofHitsSiDetectorE; i++)
             {
-                if ((*hcSiDetectorE)[i]->GetTrackID() == siEHitTrackId.back())
+                if ((*hcSiDetectorE)[i]->GetTrackID() == siEHitTrackId.back() &&
+				(*hcSiDetectorE)[i]->GetCopyNo() == siEHitCopyNo.back())
                 {
                     siEeDep += (*hcSiDetectorE)[i]->GetEnergyDeposit();
                     siETime += (*hcSiDetectorE)[i]->GetTime();
@@ -477,6 +431,7 @@ namespace MdmSim
                 else
                 {
                     siEHitTrackId.push_back((*hcSiDetectorE)[i]->GetTrackID());
+		    siEHitCopyNo.push_back((*hcSiDetectorE)[i]->GetCopyNo());
                     siEHitEDep.push_back(siEeDep);
                     siEHitTime.push_back(siETime / (double)itTimes);
                     siEHitGlobalPosX.push_back(siEGlobalPos.x() / (double)itTimes);
@@ -518,14 +473,55 @@ namespace MdmSim
             {
                 siEHitEDepExp.push_back(G4RandGauss::shoot(siEHitEDep[i], fSiDetectorEnergyResolutionFwhmFraction * siEHitEDep[i] / 2.355));
                 siEHitTimeExp.push_back(siEHitTime[i] + G4RandFlat::shoot(-fTdcResolutionHalfWidth, fTdcResolutionHalfWidth));
-                G4int frontStripNo = std::floor((siEHitLocalPosX[i] + 2.5) / (5. / 16.));
-                G4int backStripNo = std::floor((siEHitLocalPosY[i] + 2.5) / (5. / 16.));
-                siEHitHorizontalNo.push_back(backStripNo);
-                siEHitVerticalNo.push_back(frontStripNo);
+                
+		
+		//Micron S2 annular segmentation
+		//Hit coordinates in detector-local frame
+		G4double x = siEHitLocalPosX[i];
+		G4double y = siEHitLocalPosY[i];
+
+		//Radial distance from S2 center
+		G4double r = std::sqrt(x*x + y*y);
+
+		// Azimuthal angle, normalized to [0,360 degree]
+		G4double phi = std::atan2(y,x);
+		
+		if (phi < 0.0)
+			phi += 360.0 *deg;
+
+		// S2 active radii
+		G4double rInner = 1.10 *cm;
+		G4double rOuter = 3.50 *cm;
+
+		// 48 radial rings and 16 sectors
+		G4double ringWidth = (rOuter-rInner)/48.0;
+		G4double sectorWidth = 360.0 * deg / 16.0;
+
+		G4int ringNo = -1;
+		G4int sectorNo = -1;
+
+		if (r >= rInner && r < rOuter)
+		{
+			ringNo = static_cast<G4int>(
+					std::floor((r-rInner)/ringWidth));
+
+			sectorNo = static_cast<G4int>(
+					std::floor(phi/sectorWidth));
+		}
+		siEHitHorizontalNo.push_back(ringNo);
+		siEHitVerticalNo.push_back(sectorNo);
+		
+		
+		
+		//G4int frontStripNo = std::floor((siEHitLocalPosX[i] + 2.5) / (5. / 16.));
+                ///G4int backStripNo = std::floor((siEHitLocalPosY[i] + 2.5) / (5. / 16.));
+                //siEHitHorizontalNo.push_back(backStripNo);
+                //siEHitVerticalNo.push_back(frontStripNo);
             }
         }
         analysis->SetSiEHitAccepted(siEHitAccepted);
         analysis->SetSiEHitTrackId(siEHitTrackId);
+	analysis->SetSiEHitCopyNo(siEHitCopyNo);
         analysis->SetSiEHitEDep(siEHitEDep);
         analysis->SetSiEHitTime(siEHitTime);
         analysis->SetSiEHitGlobalPosX(siEHitGlobalPosX);
@@ -546,6 +542,27 @@ namespace MdmSim
         analysis->SetSiEHitHorizontalNo(siEHitHorizontalNo);
         analysis->SetSiEHitVerticalNo(siEHitVerticalNo);
 
+	//NaI Gamma Detectors
+	std::vector<G4double> naiEDep(16,0.0);
+	if (hce && fHCID_NaI >= 0)
+	{
+		SiDetectorHitsCollection *hcNaI = (SiDetectorHitsCollection *)hce->GetHC(fHCID_NaI);
+		if(hcNaI)
+		{
+			G4int nofHitsNaI = hcNaI->GetSize();
+			for (G4int i =0; i < nofHitsNaI; i++)
+			{
+				G4int copyNo = (*hcNaI)[i]->GetCopyNo();
+				
+				if (copyNo >=0 && copyNo < 16)
+				{
+					naiEDep[copyNo] += (*hcNaI)[i] ->GetEnergyDeposit();
+				}
+			}
+		}
+
+	}
+        analysis->SetNaIEDep(naiEDep);
         //
         // PPAC 1
         PpacHitsCollection *hcPpac1 = (PpacHitsCollection *)hce->GetHC(fHCID_Ppac1);

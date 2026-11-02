@@ -28,6 +28,7 @@ namespace MdmSim
         RunAction *fRunAction = nullptr;
         G4int fHCID_SiDetectorDeltaE;
         G4int fHCID_SiDetectorE;
+	G4int fHCID_NaI = -1;
         G4int fHCID_Slit;
         G4int fHCID_RaytraceFocalPlane;
         G4int fHCID_Ppac1;

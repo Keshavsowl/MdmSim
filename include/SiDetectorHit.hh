@@ -35,6 +35,7 @@ namespace MdmSim
 
         // Set methods
         void SetTrackID(G4int track) { fTrackID = track; };
+	void SetCopyNo(G4int copyNo) {fCopyNo = copyNo;};
         void SetEnergyDeposit(G4double de) { fEnergyDeposit = de; };
         void SetTime(G4double t) { fTime = t; };
         void SetMass(G4double mass) { fMass = mass; };
@@ -50,6 +51,7 @@ namespace MdmSim
 
         // Get methods
         G4int GetTrackID() const { return fTrackID; };
+	G4int GetCopyNo() const {return fCopyNo;};
         G4double GetEnergyDeposit() const { return fEnergyDeposit; };
         G4double GetTime() const { return fTime; };
         G4double GetMass() const { return fMass; };
@@ -65,6 +67,7 @@ namespace MdmSim
 
     private:
         G4int fTrackID;
+	G4int fCopyNo;
         G4double fEnergyDeposit;
         G4double fTime;
         G4double fMass;

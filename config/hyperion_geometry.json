@@ -1,0 +1,73 @@
+{
+  "SiliconGeometry": {
+    "DetectorType": "Micron S2",
+    "Shape": "G4Tubs",
+    "InnerRadiusInCm": 1.1,
+    "OuterRadiusInCm": 3.5,
+    "HalfThicknessInCm": 0.031,
+    "FullThicknessInUm": 620,
+    "ThicknessConfirmed": false,
+    "NumberOfRings": 48,
+    "NumberOfSectors": 16,
+    "GeometrySource": "Micron S2 detector catalogue; active ID 22 mm and OD 70 mm",
+    "Note": "Thickness is provisional until actual S2 detector specification is confirmed; annular area only, support/PCB and dead layers are not modeled.",
+    "PlacementConstraint": "ONE S2: center at (0,0,Z), Z>0; plane perpendicular to +Z, Euler rotations all zero; target-to-S2 distance provisional"
+  },
+  "HyperionMechanicalGuides": {
+    "BeamPortBoreDiameterInInch": 1.875,
+    "UpperLidOpeningDiameterInInch": 2.63,
+    "LowerTraverseTubeOuterDiameterInInch": 4,
+    "LowerTraverseTubeInnerDiameterInInch": 3.75,
+    "LowerTraverseTubeStockLengthInInch": 7.5,
+    "BeamPortVisualGuideExtentInCm": 17,
+    "TopVisualGuideExtentInCm": 15,
+    "Note": "Beam and top aperture dimensions are NOT external tube outer diameters. External tubes/flanges and guide origins need engineering confirmation."
+  },
+  "NaIGeometry": {
+    "Enabled": true,
+    "CrystalHalfXInCm": 2.54,
+    "CrystalHalfYInCm": 5.08,
+    "CrystalHalfZInCm": 20.32,
+    "AlWallInCm": 0.1
+  },
+  "NaIDetectors": [
+    {"CopyNo": 0, "PositionXInCm": 18.0886, "PositionYInCm": 0.4693, "PositionZInCm": -12.0891, "RadiusInCm": 21.7615, "ThetaInDeg": 123.747, "PhiInDeg": 1.4862, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 1, "PositionXInCm": 0, "PositionYInCm": 24.1, "PositionZInCm": -11, "RadiusInCm": 26.4917, "ThetaInDeg": 114.5335, "PhiInDeg": 90, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -90},
+    {"CopyNo": 2, "PositionXInCm": 0, "PositionYInCm": 23.9735, "PositionZInCm": -16.7081, "RadiusInCm": 29.2214, "ThetaInDeg": 124.8742, "PhiInDeg": 90, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": 90},
+    {"CopyNo": 3, "PositionXInCm": 0, "PositionYInCm": -14.5, "PositionZInCm": -26.6948, "RadiusInCm": 30.3787, "ThetaInDeg": 151.4902, "PhiInDeg": 270, "RotationXInDeg": -180, "RotationYInDeg": -90, "RotationZInDeg": 180},
+    {"CopyNo": 4, "PositionXInCm": -8.9086, "PositionYInCm": -22.8268, "PositionZInCm": -15.1786, "RadiusInCm": 28.8239, "ThetaInDeg": 121.7759, "PhiInDeg": 248.6807, "RotationXInDeg": -180, "RotationYInDeg": 0, "RotationZInDeg": 90},
+    {"CopyNo": 5, "PositionXInCm": 0, "PositionYInCm": 24.2906, "PositionZInCm": -5.4, "RadiusInCm": 24.8836, "ThetaInDeg": 102.5335, "PhiInDeg": 90, "RotationXInDeg": -90, "RotationYInDeg": -90, "RotationZInDeg": 90},
+    {"CopyNo": 6, "PositionXInCm": 8.5789, "PositionYInCm": -22.9841, "PositionZInCm": -14.4294, "RadiusInCm": 28.4618, "ThetaInDeg": 120.4625, "PhiInDeg": 290.4682, "RotationXInDeg": -180, "RotationYInDeg": 0, "RotationZInDeg": 90},
+    {"CopyNo": 7, "PositionXInCm": 19.34, "PositionYInCm": 0.4374, "PositionZInCm": 4.9509, "RadiusInCm": 19.9684, "ThetaInDeg": 75.6446, "PhiInDeg": 1.2956, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 8, "PositionXInCm": 8.4296, "PositionYInCm": 0.4693, "PositionZInCm": -18.1413, "RadiusInCm": 20.0096, "ThetaInDeg": 155.0435, "PhiInDeg": 3.1865, "RotationXInDeg": 90, "RotationYInDeg": -45, "RotationZInDeg": -180},
+    {"CopyNo": 9, "PositionXInCm": -18.78, "PositionYInCm": 0.6581, "PositionZInCm": -0.6822, "RadiusInCm": 18.8039, "ThetaInDeg": 92.0791, "PhiInDeg": 177.993, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 10, "PositionXInCm": -8.4296, "PositionYInCm": 0.1309, "PositionZInCm": -17.3413, "RadiusInCm": 19.282, "ThetaInDeg": 154.0729, "PhiInDeg": 179.1103, "RotationXInDeg": 90, "RotationYInDeg": 45, "RotationZInDeg": -180},
+    {"CopyNo": 11, "PositionXInCm": -18.5874, "PositionYInCm": 0.1309, "PositionZInCm": 4.9978, "RadiusInCm": 19.248, "ThetaInDeg": 74.9506, "PhiInDeg": 179.5965, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 12, "PositionXInCm": -18.4849, "PositionYInCm": 0.6581, "PositionZInCm": -6.3622, "RadiusInCm": 19.5602, "ThetaInDeg": 108.9815, "PhiInDeg": 177.961, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 13, "PositionXInCm": 19.34, "PositionYInCm": 0.4374, "PositionZInCm": -0.7291, "RadiusInCm": 19.3587, "ThetaInDeg": 92.1584, "PhiInDeg": 1.2956, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180},
+    {"CopyNo": 14, "PositionXInCm": -18.8444, "PositionYInCm": 0.6078, "PositionZInCm": -12.041, "RadiusInCm": 22.3711, "ThetaInDeg": 122.5638, "PhiInDeg": 178.1526, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": 0},
+    {"CopyNo": 15, "PositionXInCm": 19.34, "PositionYInCm": 0.4374, "PositionZInCm": -6.4091, "RadiusInCm": 20.379, "ThetaInDeg": 108.3304, "PhiInDeg": 1.2956, "RotationXInDeg": 90, "RotationYInDeg": 90, "RotationZInDeg": -180}
+  ],
+  "SiliconDetectors": [
+    {"CopyNo": 0, "Name":"S2-1", "Enabled":true, "ThicknessInUm":35.0, "PositionXInCm": 0, "PositionYInCm": 0, "PositionZInCm": 1.96, "RadiusInCm": 1.96, "ThetaInDeg": 0, "PhiInDeg": 0, "RotationXInDeg": 0, "RotationYInDeg": 0, "RotationZInDeg": 0},
+     {
+    "CopyNo": 1,
+    "Name": "S2-2",
+    "Enabled": true,
+    "ThicknessInUm": 620.0,
+    "PositionXInCm": 0.0,
+    "PositionYInCm": 0.0,
+    "PositionZInCm": 2.26,
+    "RadiusInCm": 2.26,
+    "ThetaInDeg": 0.0,
+    "PhiInDeg": 0.0,
+    "RotationXInDeg": 0.0,
+    "RotationYInDeg": 0.0,
+    "RotationZInDeg": 0.0
+  }
+    
+
+
+  ]
+}
+

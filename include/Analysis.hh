@@ -2,6 +2,7 @@
 #define MdmSimAnalysis_h 1
 
 #include "globals.hh"
+#include <vector>
 
 class TFile;
 class TTree;
@@ -22,6 +23,90 @@ namespace MdmSim
 
         void FillTreeAccurate();
         void FillTreeExperiment();
+        
+       	void ResetAlpha1Generated()
+	{
+		fAlpha1Generated = false;
+		fAlpha1Energy = 0.;
+		fAlpha1Theta = 0.;
+		fAlpha1Phi = 0.;
+	}
+	void SetAlpha1Generated(G4bool value)
+	{ 	
+		fAlpha1Generated = value;
+	}
+
+	void SetAlpha1Energy(G4double value)
+	{
+		fAlpha1Energy = value;
+	 }
+
+	void SetAlpha1Theta(G4double value)
+	{
+    		fAlpha1Theta = value;
+	}
+
+	void SetAlpha1Phi(G4double value)
+	{
+    		fAlpha1Phi = value;
+	}
+
+
+
+	void ResetAlpha2Generated()
+	{
+		fAlpha2Generated = false;
+		fAlpha2Energy = 0.;
+		fAlpha2Theta = 0.;
+		fAlpha2Phi = 0.;
+	}
+	void SetAlpha2Generated(G4bool value)
+	{
+		fAlpha2Generated = value;
+	}
+
+	void SetAlpha2Energy(G4double value)
+	{
+		fAlpha2Energy = value;
+	}
+
+	void SetAlpha2Theta(G4double value)
+	{
+		fAlpha2Theta = value;
+	}
+	void SetAlpha2Phi(G4double value)
+	{
+		fAlpha2Phi = value;
+	}
+
+
+       void ResetGammaGenerated()
+	{
+    		fGammaGenerated = false;
+    		fGammaEnergy = 0.;
+    		fGammaTheta = 0.;
+    		fGammaPhi = 0.;
+	}
+
+	void SetGammaGenerated(G4bool value)
+	{
+    		fGammaGenerated = value;
+	}
+
+	void SetGammaEnergy(G4double value)
+	{
+    		fGammaEnergy = value;
+	}
+
+	void SetGammaTheta(G4double value)
+	{
+    		fGammaTheta = value;
+	}
+
+	void SetGammaPhi(G4double value)
+	{
+    		fGammaPhi = value;
+	}	
 
         void SetSlitHitPresent(G4bool present) { fSlitHitPresent = present; };
         void SetSlitHitTransmitted(G4bool transmitted) { fSlitHitTransmitted = transmitted; };
@@ -57,7 +142,11 @@ namespace MdmSim
 
         void SetSiEHitAccepted(G4bool acc) { fSiEHitAccepted = acc; };
         void SetSiEHitTrackId(std::vector<G4int> &v) { fSiEHitTrackId = v; };
+	void SetSiEHitCopyNo(std::vector<G4int> &v) {fSiEHitCopyNo = v;};
+
         void SetSiEHitEDep(std::vector<G4double> &v) { fSiEHitEDep = v; };
+	void SetNaIEDep(const std::vector<G4double> &v) {fNaIEDep = v;};
+
         void SetSiEHitTime(std::vector<G4double> &v) { fSiEHitTime = v; };
         void SetSiEHitGlobalPosX(std::vector<G4double> &v) { fSiEHitGlobalPosX = v; };
         void SetSiEHitGlobalPosY(std::vector<G4double> &v) { fSiEHitGlobalPosY = v; };
@@ -120,6 +209,21 @@ namespace MdmSim
         TFile *fFile = nullptr;
         TTree *fTreeAccurate = nullptr;
         TTree *fTreeExperiment = nullptr;
+
+	G4bool fAlpha1Generated;
+	G4double fAlpha1Energy;
+	G4double fAlpha1Theta;
+	G4double fAlpha1Phi;
+
+	G4bool fAlpha2Generated;
+	G4double fAlpha2Energy;
+	G4double fAlpha2Theta;
+	G4double fAlpha2Phi;
+
+	G4bool fGammaGenerated;
+	G4double fGammaEnergy;
+	G4double fGammaTheta;
+	G4double fGammaPhi;
         
         G4bool fSlitHitPresent;
         G4bool fSlitHitTransmitted;
@@ -155,7 +259,9 @@ namespace MdmSim
 
         G4bool fSiEHitAccepted;
         std::vector<G4int> fSiEHitTrackId;
+	std::vector<G4int> fSiEHitCopyNo;
         std::vector<G4double> fSiEHitEDep;
+	std::vector<G4double> fNaIEDep;
         std::vector<G4double> fSiEHitTime;
         std::vector<G4double> fSiEHitGlobalPosX;
         std::vector<G4double> fSiEHitGlobalPosY;

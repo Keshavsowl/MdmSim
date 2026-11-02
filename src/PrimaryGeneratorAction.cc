@@ -99,7 +99,7 @@ namespace MdmSim
         // direction.setPhi(phi);
         fParticleGun->SetParticleMomentumDirection(direction);
 
-        fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., -1.));
+        fParticleGun->SetParticlePosition(G4ThreeVector(0., 0., -5. * cm));
         // fParticleGun->SetParticleEnergy(G4RandGauss::shoot(20. * MeV, 0.005 * 20. * MeV / 2.355));
         fParticleGun->SetParticleEnergy(fBeamEnergy);
 

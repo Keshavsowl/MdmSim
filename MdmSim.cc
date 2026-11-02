@@ -1,10 +1,13 @@
 #include "DetectorConstruction.hh"
 #include "ActionInitialization.hh"
 #include "ReactionPhysics.hh"
+#include "DecayPhysics.hh"
+#include "DecayChannel.hh"
 #include "nlohmann/json.hpp"
 
 #include "G4RunManagerFactory.hh"
 #include "G4SteppingVerbose.hh"
+#include "G4SystemOfUnits.hh"
 #include "G4UImanager.hh"
 #include "G4VModularPhysicsList.hh"
 #include "QBBC.hh"
@@ -27,7 +30,7 @@
 #include <string>
 #include <utility>
 #include <variant>
-
+#include <vector>
 using namespace MdmSim;
 using json = nlohmann::json;
 
@@ -71,6 +74,101 @@ namespace
             throw ConfigurationError(name + " must satisfy Z >= 0, A > 0, and A >= Z.");
         }
     }
+    
+
+
+    std::vector<MdmSim::DecayChannel> ParseDecayChannels(const json &config)
+    {
+	    std::vector<MdmSim::DecayChannel> channels;
+	    if (!config.contains("Decays"))
+		    return channels;
+
+	    const auto &decays = config.at("Decays");
+	    if (!decays.is_array())
+		    throw ConfigurationError("\"Decays\" must be a JSON array.");
+	    
+	    for (const auto &d : decays)
+	    {
+		    MdmSim::DecayChannel channel;
+		    channel.parentZ = d.at("ParentZ").get<G4int>();
+		    channel.parentA = d.at("ParentA").get<G4int>();
+		    channel.parentExcitationEnergy = d.value("ParentExMeV", 0.0) * MeV;
+
+		    channel.probability = d.value("DecayProbability", 1.0);
+		     // Product 1
+		    channel.product1.particleType = d.value("Product1Particle", std::string("ion"));
+		    if (channel.product1.particleType== "ion")
+		    {
+			    channel.product1.Z = d.at("Product1Z").get<G4int>();
+			    channel.product1.A = d.at("Product1A").get<G4int>();
+			    channel.product1.charge = d.at("Product1Charge").get<G4double>();
+			    channel.product1.excitationEnergy = d.value("Product1ExMeV",0.0)*MeV;
+		    }
+
+		    // Product 2
+                    channel.product2.particleType = d.value("Product2Particle", std::string("ion"));
+                    if (channel.product2.particleType== "ion")
+                    {
+                            channel.product2.Z = d.at("Product2Z").get<G4int>();
+                            channel.product2.A = d.at("Product2A").get<G4int>();
+                            channel.product2.charge = d.at("Product2Charge").get<G4double>();
+                            channel.product2.excitationEnergy = d.value("Product2ExMeV",0.0)*MeV;
+                    }
+                     channels.push_back(channel);
+	    }
+	    return channels;
+    }
+
+// --------------------------------------------------
+// Read detector positions and rotations from JSON
+// --------------------------------------------------
+
+   std::vector<DetectorPosition> ParseDetectorPositions(
+    const json &detectors)
+    {
+    std::vector<DetectorPosition> positions;
+
+    if (!detectors.is_array())
+    {
+        throw ConfigurationError(
+            "Detector positions must be a JSON array.");
+    }
+
+    for (const auto &d : detectors)
+    {
+        DetectorPosition p;
+
+        p.copyNo = d.at("CopyNo").get<G4int>();
+
+        // Cartesian coordinates
+        p.x = d.at("PositionXInCm").get<G4double>() * cm;
+        p.y = d.at("PositionYInCm").get<G4double>() * cm;
+        p.z = d.at("PositionZInCm").get<G4double>() * cm;
+
+        // Spherical coordinates
+        p.radius = d.at("RadiusInCm").get<G4double>() * cm;
+        p.theta = d.at("ThetaInDeg").get<G4double>() * deg;
+        p.phi = d.at("PhiInDeg").get<G4double>() * deg;
+
+        // Detector rotations
+        p.rotX = d.at("RotationXInDeg").get<G4double>() * deg;
+        p.rotY = d.at("RotationYInDeg").get<G4double>() * deg;
+        p.rotZ = d.at("RotationZInDeg").get<G4double>() * deg;
+
+	//Detector activation
+	p.enabled = d.value("Enabled", true);
+
+	//Full Detector thickness
+	p.thickness = d.value("ThicknessInUm", 0.0) *um;
+
+        positions.push_back(p);
+    }
+
+    return positions;
+        } 
+
+
+
 
     void ValidateConfiguration(const json &config)
     {
@@ -185,8 +283,44 @@ int main(int argc, char **argv)
         }
         const json config = json::parse(configStream, nullptr, true, true);
         ValidateConfiguration(config);
-
+        const auto decayChannels = ParseDecayChannels(config);
+	G4cout << "Configured decay channels: " << decayChannels.size() << G4endl;
         const std::filesystem::path configDirectory = std::filesystem::absolute(std::filesystem::path(configFile)).parent_path();
+
+	//----------------------
+	//----Load Hyperion detector Geometry
+	//----------------------------------
+	const auto geometryPath = ResolvePath(configDirectory, config.at("DetectorGeometryFile").get<std::string>());
+
+	RequireFile(geometryPath, "Hyperion Geometry File");
+	std::ifstream geometryStream(geometryPath);
+        const json geometry = json::parse(geometryStream);
+	
+	// Read NaI crystal geometry from Hyperion JSON
+	const auto &naiGeometry = geometry.at("NaIGeometry");
+
+	const G4bool naiEnabled = naiGeometry.at("Enabled").get<G4bool>();
+
+	const G4double naiHalfX = naiGeometry.at("CrystalHalfXInCm").get<G4double>() * cm;
+	const G4double naiHalfY = naiGeometry.at("CrystalHalfYInCm").get<G4double>() * cm;
+	const G4double naiHalfZ = naiGeometry.at("CrystalHalfZInCm").get<G4double>() * cm;
+	const G4double naiAlWall = naiGeometry.at("AlWallInCm").get<G4double>() * cm;
+	
+	
+	
+	// Read NaI detector Positions
+	const std::vector<DetectorPosition> naiPositions = ParseDetectorPositions(geometry.at("NaIDetectors"));
+
+	// Read S2 Detector Positions
+	const std::vector<DetectorPosition> siliconPositions = ParseDetectorPositions(geometry.at("SiliconDetectors"));
+	if (naiPositions.size() != 16 || siliconPositions.size() != 2)
+	{
+		throw ConfigurationError(
+				"Expected 16 NaI detectors and 2  S2 detectors.");
+	}
+
+
+
         const std::filesystem::path fieldMapDirectory = ResolvePath(configDirectory, config.at("FieldMapDirectory").get<std::string>());
 
         const G4bool interactive = config.at("Interactive").get<G4bool>();
@@ -302,6 +436,19 @@ int main(int argc, char **argv)
         DetectorConstruction *detector = new DetectorConstruction();
         detector->SetFieldMapPaths(fieldMapPaths);
         detector->ParseParams(detectorParameters);
+	
+	//Set Hyperion Detectors 
+	detector->SetNaIDetectors(naiPositions);
+	detector->SetSiliconDetectors(siliconPositions);
+        detector->SetNaIGeometry(
+			naiEnabled,
+			naiHalfX,
+			naiHalfY,
+			naiHalfZ,
+			naiAlWall
+			);
+
+
         runManager->SetUserInitialization(detector);
 
         // Physics list
@@ -313,6 +460,13 @@ int main(int argc, char **argv)
             reactionPhysics->SetReactionParams(reactionParameters);
             physicsList->RegisterPhysics(reactionPhysics);
         }
+	if (!decayChannels.empty())
+	{
+		auto *decayPhysics = new DecayPhysics;
+		decayPhysics->SetDecayChannels(decayChannels);
+		physicsList ->RegisterPhysics(decayPhysics);
+
+	}
         runManager->SetUserInitialization(physicsList);
 
         // User action initialization

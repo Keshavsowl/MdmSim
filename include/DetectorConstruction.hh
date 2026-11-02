@@ -6,8 +6,11 @@
 #include "G4RotationMatrix.hh"
 #include "MdmFieldMapMagneticField.hh"
 #include "MdmChargeStateMagneticEqRhs.hh"
+#include "G4SystemOfUnits.hh"
 
 #include "globals.hh"
+#include <map>
+#include <vector>
 
 class G4VPhysicalVolume;
 class G4Material;
@@ -17,7 +20,34 @@ class G4GenericMessenger;
 /// Detector construction class to define materials and geometry.
 
 namespace MdmSim
-{
+{   
+    struct DetectorPosition
+    {
+    G4int copyNo = 0;
+    //Spherical Coordinates
+    G4double radius = 0.;
+    G4double theta =0.;
+    G4double phi =0.;
+
+    // Cartesian position
+    G4double x =0.;
+    G4double y =0.;
+    G4double z = 0.;
+
+    // Detector Rotation
+    G4double rotX = 0.;
+    G4double rotY = 0.;
+    G4double rotZ = 0.;
+
+    //Detector Activation
+    G4bool enabled = true;
+
+    //Full detector thickness
+    G4double thickness = 0.;
+
+    };    
+
+	
     class DetectorConstruction : public G4VUserDetectorConstruction
     {
     public:
@@ -27,6 +57,17 @@ namespace MdmSim
         G4VPhysicalVolume *Construct() override;
         void ConstructSDandField() override;
         void ParseParams(std::map<std::string, G4double> params);
+	void SetSiliconDetectors(const std::vector<DetectorPosition> &positions);
+        void SetNaIDetectors(const std::vector<DetectorPosition> &positions);
+	void SetNaIGeometry(
+			G4bool enabled,
+			G4double halfX,
+			G4double halfY,
+			G4double halfZ,
+			G4double alWall
+			);
+
+
         void SetFieldMapPaths(const MdmFieldMapPaths &paths);
         G4double GetTargetThicknessLength() const;
         G4double GetTargetRotationAngle() const { return fTargetRotationAngle; }
@@ -42,10 +83,22 @@ namespace MdmSim
         G4double fTargetRotationAngle;
         G4double fTargetThickness;
 
+        //Silicon Detectors
         G4bool fUseDeltaE;
-        G4double fSiDetectorAngle;
+        G4double fSiDetectorAngle = 90.0 * deg;
+        std::vector<DetectorPosition> fSiliconDetectors;
+	std::vector<DetectorPosition> fNaIDetectors;
+        // NaI gamma-detector array
+        G4bool fUseNaI = false;
+
+        G4double fNaICrystalHalfX = 0.;
+        G4double fNaICrystalHalfY = 0.;
+        G4double fNaICrystalHalfZ = 0.;
+
+        G4double fNaIAlWall = 0.;
 
         G4double fMdmAngle;
+        
         G4int fBeamZ = 0;
         G4int fBeamA = 0;
         G4double fBeamCharge = 0.;

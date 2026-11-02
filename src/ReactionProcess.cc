@@ -1,4 +1,5 @@
 #include "ReactionProcess.hh"
+#include "Analysis.hh"
 #include "DetectorConstruction.hh"
 
 #include "G4DynamicParticle.hh"
@@ -239,6 +240,24 @@ namespace MdmSim
         const TVector3 betaCm = cm.BoostVector();
         light4.Boost(betaCm);
         heavy4.Boost(betaCm);
+	
+	const G4double alpha1KE = light4.E() - lightMass;
+	const TVector3 alpha1MomentumLab = light4.Vect();
+	Analysis *analysis = Analysis::Instance();
+	
+
+	analysis->SetAlpha1Generated(true);
+	analysis->SetAlpha1Energy(alpha1KE / MeV);
+	analysis->SetAlpha1Theta(alpha1MomentumLab.Theta() / deg);
+	analysis->SetAlpha1Phi(alpha1MomentumLab.Phi() / deg);
+	G4cout << "alpha1 lab:"
+		<< "E=" << alpha1KE /MeV
+		<< "MeV"
+		<< "theta="<< alpha1MomentumLab.Theta() / deg
+		<< "deg"
+		<< "phi=" << alpha1MomentumLab.Phi() / deg
+		<< " deg"
+		<< G4endl;
 
         auto *light = new G4DynamicParticle(lightDefinition,
                                             G4ThreeVector(light4.Px(), light4.Py(), light4.Pz()));

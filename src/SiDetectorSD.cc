@@ -51,6 +51,12 @@ namespace MdmSim
             return false;
 
         SiDetectorHit *newHit = new SiDetectorHit();
+	G4int copyNo = 
+		aStep->GetPreStepPoint()
+		     ->GetTouchableHandle()
+		     ->GetCopyNumber();
+	
+	newHit->SetCopyNo(copyNo);
 
         // Track ID
         newHit->SetTrackID(aStep->GetTrack()->GetTrackID());
@@ -76,7 +82,40 @@ namespace MdmSim
         // Particle kinetic energy
         newHit->SetKineticEnergy(aStep->GetTrack()->GetDynamicParticle()->GetKineticEnergy());
 
+
+
         // Hit position
+        const G4ThreeVector globalPosition =
+            aStep->GetPreStepPoint()->GetPosition();
+
+        newHit->SetGlobalPosition(globalPosition);
+
+        // Transform from global to detector-local coordinates
+        const auto& transform =
+            aStep->GetPreStepPoint()
+                 ->GetTouchableHandle()
+                 ->GetHistory()
+                 ->GetTopTransform();
+
+        const G4ThreeVector localPosition =
+            transform.TransformPoint(globalPosition);
+
+        newHit->SetLocalPosition(localPosition);
+
+        // Hit momentum
+        const G4ThreeVector globalMomentum =
+            aStep->GetTrack()->GetMomentum();
+
+        newHit->SetGlobalMomentum(globalMomentum);
+
+        const G4ThreeVector localMomentum =
+            transform.TransformAxis(globalMomentum);
+
+        newHit->SetLocalMomentum(localMomentum);
+
+
+        // Hit position
+	/*
         newHit->SetGlobalPosition(aStep->GetPreStepPoint()->GetPosition());
         G4ThreeVector translatedPosition = aStep->GetPreStepPoint()->GetPosition() - aStep->GetPreStepPoint()->GetPhysicalVolume()->GetObjectTranslation();
         G4ThreeVector rotatedPosition = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetObjectRotation()->inverse().operator()(translatedPosition);
@@ -86,7 +125,7 @@ namespace MdmSim
         newHit->SetGlobalMomentum(aStep->GetTrack()->GetMomentum());
         G4ThreeVector rotatedMomentum = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetObjectRotation()->inverse().operator()(aStep->GetTrack()->GetMomentum());
         newHit->SetLocalMomentum(rotatedMomentum);
-
+        */
         fHitsCollection->insert(newHit);
 
         // newHit->Print();

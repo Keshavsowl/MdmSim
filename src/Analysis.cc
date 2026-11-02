@@ -57,7 +57,27 @@ namespace MdmSim
             fTreeExperiment = new TTree("ExperimentalData", "Experimental data recorded by DAQ");
 
             // Add branches to trees
-            fTreeAccurate->Branch("SlitHitPresent", &fSlitHitPresent);
+            
+
+	    fTreeAccurate->Branch("Alpha1Generated",&fAlpha1Generated);
+	    fTreeAccurate->Branch("Alpha1Energy",&fAlpha1Energy);
+	    fTreeAccurate->Branch("Alpha1Theta",&fAlpha1Theta);
+	    fTreeAccurate->Branch("Alpha1Phi", &fAlpha1Phi);
+	    
+	    
+	    fTreeAccurate->Branch("Alpha2Generated",&fAlpha2Generated);
+	    fTreeAccurate->Branch("Alpha2Energy", &fAlpha2Energy);
+	    fTreeAccurate->Branch("Alpha2Theta", &fAlpha2Theta);
+	    fTreeAccurate->Branch("Alpha2Phi", &fAlpha2Phi);
+	    
+	    fTreeAccurate->Branch("GammaGenerated",&fGammaGenerated);
+	    fTreeAccurate->Branch("GammaEnergy", &fGammaEnergy);
+	    fTreeAccurate->Branch("GammaTheta", &fGammaTheta);
+	    fTreeAccurate->Branch("GammaPhi", &fGammaPhi);
+	    
+	    
+	    
+	    fTreeAccurate->Branch("SlitHitPresent", &fSlitHitPresent);
             fTreeAccurate->Branch("SlitHitTransmitted", &fSlitHitTransmitted);
             fTreeAccurate->Branch("SlitHitTrackId", &fSlitHitTrackId);
             fTreeAccurate->Branch("SlitHitLocalPosX", &fSlitHitLocalPosX);
@@ -91,7 +111,9 @@ namespace MdmSim
 
             fTreeAccurate->Branch("SiEHitAccepted", &fSiEHitAccepted);
             fTreeAccurate->Branch("SiEHitTrackId", &fSiEHitTrackId);
+	    fTreeAccurate->Branch("SiEHitCopyNo", &fSiEHitCopyNo);
             fTreeAccurate->Branch("SiEHitEDep", &fSiEHitEDep);
+	    fTreeAccurate->Branch("NaIEDep", &fNaIEDep);
             fTreeAccurate->Branch("SiEHitTime", &fSiEHitTime);
             fTreeAccurate->Branch("SiEHitGlobalPosX", &fSiEHitGlobalPosX);
             fTreeAccurate->Branch("SiEHitGlobalPosY", &fSiEHitGlobalPosY);

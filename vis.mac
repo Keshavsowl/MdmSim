@@ -100,7 +100,7 @@
 /vis/geometry/set/colour SlitBox 0 0.879 0.754 0.430 1 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
 /vis/geometry/set/visibility FirstMultipoleFieldLogical 0 false # Make "FirstMultipoleFieldLogical" invisible
 /vis/geometry/set/colour FirstMultipoleMagnetLogical 0 0.531 0.543 0.551 0.5 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
-/vis/geometry/set/colour SiDetectorDeltaE 0 0 1 0 1 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
+#/vis/geometry/set/colour SiDetectorDeltaE 0 0 1 0 1 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
 /vis/geometry/set/colour SiDetectorE 0 0 1 0 1 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
 /vis/geometry/set/colour DipoleFieldLogical 0 0 0 1 0.5 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]
 /vis/geometry/set/colour DipoleMagnetLogical 0 1 0 0 0.5 # colour [logical-volume-name] [depth] [red] [green] [blue] [opacity]

@@ -1,0 +1,115 @@
+{
+  // Run mode.
+  "Interactive": true,
+
+  // Geant4 macro used in batch mode.
+  // This path is interpreted from the working directory, normally build/,
+  // where CMake copies run.mac.
+  "MacroName": "run.mac",
+
+  // Job index used in the output filename and in automatic seed mixing.
+  "ProcessNumber": 0,
+
+  // Primary beam.
+  "BeamZ": 3,
+  "BeamA": 6,
+  "BeamCharge": 3,                 // charge state Q, in units of e
+  "BeamEnergyInMeV": 25.0,         // MeV kinetic energy
+
+  // Forced relativistic two-body reaction.
+  "ReactionEnabled": true,
+  "ReactionProbability": 1.0,      // range: 0 to 1
+
+  "ReactionTargetZ": 7,
+  "ReactionTargetA": 14,
+
+  "ReactionLightZ": 2,
+  "ReactionLightA": 4,
+  "ReactionLightCharge": 2,        // charge state, in units of e
+  "ReactionLightExMeV": 0.0,       // MeV excitation energy
+
+  "ReactionHeavyZ": 8,
+  "ReactionHeavyA": 16,
+  "ReactionHeavyCharge": 8,        // charge state, in units of e
+  "ReactionHeavyExMeV": 12.690,       // MeV excitation energy
+  
+  // Sequential Decay channels.
+  "Decays":[
+	  {
+          "ParentZ": 8,
+	  "ParentA": 16,
+	  "ParentExMeV": 12.690,
+	  "DecayProbability": 1.0,  
+             
+	  "Product1Particle": "ion",
+	  "Product1Z": 2,
+	  "Product1A": 4,
+	  "Product1Charge": 2,
+	  "Product1ExMeV" :0.0,
+
+	  "Product2Particle": "ion",
+          "Product2Z": 6,
+          "Product2A": 12,
+          "Product2Charge": 6,
+          "Product2ExMeV" : 4.439
+	  },
+
+          {  
+          "ParentZ": 6,
+          "ParentA": 12,
+          "ParentExMeV": 4.439,
+          "DecayProbability": 1.0,
+
+          "Product1Particle": "ion",
+          "Product1Z": 6,
+          "Product1A": 12,
+          "Product1Charge": 6,
+          "Product1ExMeV" :0.0,
+
+          "Product2Particle": "gamma"
+          }
+
+         ],
+
+  // Virtual target geometry.
+  // The current target material is G4_Galactic.
+  // TargetThicknessInMgCm2 is converted to a geometrical thickness
+  // using 2.253 g/cm^3; real target energy loss is not modeled.
+  "TargetRotationAngleInDeg": 0.0, // deg
+  "TargetThicknessInMgCm2": 159.0, // mg/cm^2
+
+  // Uniform time smearing:
+  // measured time = true time + Uniform(-halfWidth, +halfWidth).
+  "TdcResolutionHalfWidthInNs": 0.25, // ns
+
+  "UseDeltaE": false,
+  "DetectorGeometryFile": "hyperion_geometry.json",
+  "SiDetectorAngleInDeg": 90.0,
+
+
+  // Hyperion, NaI and S2 geometry are stored in hyperion_geometry.json.
+
+  // Fractional FWHM of the Gaussian silicon-energy resolution.
+  // 0.10 means 10% FWHM; sigma = 0.10 * E / 2.355.
+  "SiDetectorEnergyResolutionFwhmFraction": 0.10,
+
+  // Rotation of the MDM geometry around the target.
+  // The primary beam itself is generated along +z.
+  "MdmAngleInDeg": 0.0,            // deg
+
+  // Requested hall-probe settings. These must agree with the metadata
+  // embedded in all four field maps.
+  "DipoleProbe": 2338.00,          // Gauss
+  "FirstMultipoleProbe": 1659.98,  // Gauss
+
+  // FieldMapDirectory is resolved relative to config/config.json.
+  "FieldMapDirectory": "../field",
+  "MultipoleFieldMap": "Multipole.bin",
+  "DipoleEntranceFieldMap": "DipoleEntrance.bin",
+  "DipoleSectorFieldMap": "DipoleSector.bin",
+  "DipoleExitFieldMap": "DipoleExit.bin",
+
+  // PPAC working-gas pressure and cathode spacing.
+  "PpacGasPressureInTorr": 4.0,     // Torr
+  "PpacLengthInCm": 40.0            // cm
+}
