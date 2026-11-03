@@ -74,6 +74,22 @@ namespace MdmSim
 	    fTreeAccurate->Branch("GammaEnergy", &fGammaEnergy);
 	    fTreeAccurate->Branch("GammaTheta", &fGammaTheta);
 	    fTreeAccurate->Branch("GammaPhi", &fGammaPhi);
+
+            // Coincidence flags, matched to the tagged particles by track ID.
+            // Efficiency normalisation for a light-product cone:
+            //   fraction of isotropic CM emission = entries / sum(ReactionConeTries)
+            fTreeAccurate->Branch("Alpha1TrackId", &fAlpha1TrackId, "Alpha1TrackId/I");
+            fTreeAccurate->Branch("Alpha2TrackId", &fAlpha2TrackId, "Alpha2TrackId/I");
+            fTreeAccurate->Branch("GammaTrackId", &fGammaTrackId, "GammaTrackId/I");
+            fTreeAccurate->Branch("ReactionConeTries", &fReactionConeTries, "ReactionConeTries/L");
+            fTreeAccurate->Branch("Alpha1AtMdm", &fAlpha1AtMdm, "Alpha1AtMdm/O");
+            fTreeAccurate->Branch("Alpha1AtPpacs", &fAlpha1AtPpacs, "Alpha1AtPpacs/O");
+            fTreeAccurate->Branch("Alpha1S2EDep", &fAlpha1S2EDep, "Alpha1S2EDep/D");
+            fTreeAccurate->Branch("Alpha2AtS2", &fAlpha2AtS2, "Alpha2AtS2/O");
+            fTreeAccurate->Branch("Alpha2S2EDep", &fAlpha2S2EDep, "Alpha2S2EDep/D");
+            fTreeAccurate->Branch("GammaAtNaI", &fGammaAtNaI, "GammaAtNaI/O");
+            fTreeAccurate->Branch("NaIEDepTotal", &fNaIEDepTotal, "NaIEDepTotal/D");
+            fTreeAccurate->Branch("TripleCoincidence", &fTripleCoincidence, "TripleCoincidence/O");
 	    
 	    
 	    

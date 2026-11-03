@@ -1,5 +1,6 @@
 #include "DecayProcess.hh"
 #include "Analysis.hh"
+#include "TrackRole.hh"
 #include "TLorentzVector.h"
 #include "G4DynamicParticle.hh"
 #include "TVector3.h"
@@ -150,7 +151,10 @@ namespace MdmSim
 		product2FourRest.Boost(betaParent);
 
 		const G4double product1KE = product1FourRest.E() - product1Mass;
-		if (channel.parentZ == 8 && channel.parentA ==16)
+		// Primary decay = decay of the reaction's heavy product (e.g. 16O*).
+		const TrackRole *parentRole = TrackRole::Of(aTrack);
+		const G4bool isPrimaryDecay = parentRole && parentRole->GetRole() == TrackRole::kReactionHeavy;
+		if (isPrimaryDecay)
 		{
 			const TVector3 alpha2MomentumLab = product1FourRest.Vect();
 			Analysis *analysis = Analysis::Instance();
@@ -215,7 +219,15 @@ namespace MdmSim
 
 		auto *product1Track = new G4Track(product1, aTrack.GetGlobalTime(), aTrack.GetPosition());
 		auto *product2Track = new G4Track(product2, aTrack.GetGlobalTime(), aTrack.GetPosition());
-		
+		const auto roleFor = [&](const G4ParticleDefinition *definition, TrackRole::Role primaryRole)
+		{
+			if (definition == G4Gamma::GammaDefinition())
+				return TrackRole::kDecayGamma;
+			return isPrimaryDecay ? primaryRole : TrackRole::kOtherDecayProduct;
+		};
+		product1Track->SetUserInformation(new TrackRole(roleFor(product1Definition, TrackRole::kPrimaryDecayLight)));
+		product2Track->SetUserInformation(new TrackRole(roleFor(product2Definition, TrackRole::kPrimaryDecayHeavy)));
+
 		aParticleChange.SetNumberOfSecondaries(2);
 		aParticleChange.AddSecondary(product1Track);
 		aParticleChange.AddSecondary(product2Track);

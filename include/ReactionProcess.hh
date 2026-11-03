@@ -16,6 +16,11 @@ namespace MdmSim
 
         G4double GetMeanFreePath(const G4Track &, G4double,
                                  G4ForceCondition *);
+        // Returns the exact distance to the sampled reaction point, so the
+        // reaction depth is uniform and every selected beam ion reacts in the
+        // target (the base class would treat it as an exponential mean free path).
+        G4double PostStepGetPhysicalInteractionLength(const G4Track &, G4double,
+                                                      G4ForceCondition *) override;
         G4VParticleChange *PostStepDoIt(const G4Track &, const G4Step &);
 
         void StartTracking(G4Track *);
@@ -42,6 +47,12 @@ namespace MdmSim
         G4double fReactionFraction = 0.;
         G4double fReactionProbability = 1.;
         G4bool fWillReact = true;
+        // Light-product cone: when fLightConeHalfAngle > 0, the CM direction is
+        // resampled until the lab light product lies within this half-angle of
+        // the MDM axis. Analysis records the number of tries per reaction so the
+        // efficiency can be normalised to isotropic CM emission.
+        G4double fLightConeHalfAngle = 0.;
+        G4double fMdmAngle = 0.;
     };
 }
 #endif

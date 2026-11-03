@@ -1,6 +1,7 @@
 #include "ReactionProcess.hh"
 #include "Analysis.hh"
 #include "DetectorConstruction.hh"
+#include "TrackRole.hh"
 
 #include "G4DynamicParticle.hh"
 #include "G4EventManager.hh"
@@ -103,6 +104,13 @@ namespace MdmSim
         return std::max(0., reactionPath - depth);
     }
 
+    G4double ReactionProcess::PostStepGetPhysicalInteractionLength(const G4Track &aTrack,
+                                                                    G4double previousStepSize,
+                                                                    G4ForceCondition *condition)
+    {
+        return GetMeanFreePath(aTrack, previousStepSize, condition);
+    }
+
     G4VParticleChange *ReactionProcess::PostStepDoIt(const G4Track &aTrack,
                                                      const G4Step &aStep)
     {
@@ -142,6 +150,8 @@ namespace MdmSim
         fHeavyProductCharge = RoundedParam(params, "HeavyProductCharge");
         fHeavyProductEx = OptionalParam(params, "HeavyProductExMeV", 0.) * MeV;
         fReactionProbability = OptionalParam(params, "ReactionProbability", 1.);
+        fLightConeHalfAngle = OptionalParam(params, "LightConeHalfAngleInDeg", 0.) * deg;
+        fMdmAngle = OptionalParam(params, "MdmAngleInDeg", 0.) * deg;
 
         if (fBeamZ <= 0 || fBeamA <= 0 || fTargetZ < 0 || fTargetA <= 0 ||
             fLightProductZ < 0 || fLightProductA <= 0 ||
@@ -231,21 +241,40 @@ namespace MdmSim
         const G4double eHeavyCm =
             (s + heavyMass * heavyMass - lightMass * lightMass) / (2. * sqrtS);
 
-        TVector3 lightMomentumCm(pCm, 0., 0.);
-        lightMomentumCm.SetTheta(std::acos(-1. + 2. * G4UniformRand()));
-        lightMomentumCm.SetPhi(G4UniformRand() * 2. * CLHEP::pi);
-
-        TLorentzVector light4(lightMomentumCm, eLightCm);
-        TLorentzVector heavy4(-lightMomentumCm, eHeavyCm);
         const TVector3 betaCm = cm.BoostVector();
-        light4.Boost(betaCm);
-        heavy4.Boost(betaCm);
-	
+        G4ThreeVector mdmAxis(0., 0., 1.);
+        mdmAxis.rotateY(fMdmAngle);
+        const TVector3 coneAxis(mdmAxis.x(), mdmAxis.y(), mdmAxis.z());
+        const G4double cosConeHalfAngle = std::cos(fLightConeHalfAngle);
+        constexpr G4long kMaxConeTries = 100000000;
+
+        TLorentzVector light4;
+        TLorentzVector heavy4;
+        G4long coneTries = 0;
+        while (true)
+        {
+            ++coneTries;
+            TVector3 lightMomentumCm(pCm, 0., 0.);
+            lightMomentumCm.SetTheta(std::acos(-1. + 2. * G4UniformRand()));
+            lightMomentumCm.SetPhi(G4UniformRand() * 2. * CLHEP::pi);
+
+            light4 = TLorentzVector(lightMomentumCm, eLightCm);
+            heavy4 = TLorentzVector(-lightMomentumCm, eHeavyCm);
+            light4.Boost(betaCm);
+            heavy4.Boost(betaCm);
+
+            if (fLightConeHalfAngle <= 0. ||
+                light4.Vect().Unit().Dot(coneAxis) >= cosConeHalfAngle)
+                break;
+            if (coneTries >= kMaxConeTries)
+                throw std::runtime_error("No light product reached the MDM cone; check ReactionLightConeHalfAngleInDeg and MdmAngleInDeg");
+        }
+
 	const G4double alpha1KE = light4.E() - lightMass;
 	const TVector3 alpha1MomentumLab = light4.Vect();
 	Analysis *analysis = Analysis::Instance();
-	
 
+	analysis->SetReactionConeTries(coneTries);
 	analysis->SetAlpha1Generated(true);
 	analysis->SetAlpha1Energy(alpha1KE / MeV);
 	analysis->SetAlpha1Theta(alpha1MomentumLab.Theta() / deg);
@@ -268,6 +297,8 @@ namespace MdmSim
 
         auto *lightTrack = new G4Track(light, aTrack.GetGlobalTime(), reactionPosition);
         auto *heavyTrack = new G4Track(heavy, aTrack.GetGlobalTime(), reactionPosition);
+        lightTrack->SetUserInformation(new TrackRole(TrackRole::kReactionLight));
+        heavyTrack->SetUserInformation(new TrackRole(TrackRole::kReactionHeavy));
 
         aParticleChange.SetNumberOfSecondaries(2);
         aParticleChange.AddSecondary(lightTrack);

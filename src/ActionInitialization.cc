@@ -3,6 +3,7 @@
 #include "RunAction.hh"
 #include "EventAction.hh"
 #include "SteppingAction.hh"
+#include "TrackingAction.hh"
 
 namespace MdmSim
 {
@@ -47,6 +48,7 @@ namespace MdmSim
         SetUserAction(eventAction);
 
         SetUserAction(new SteppingAction(eventAction));
+        SetUserAction(new TrackingAction);
     }
 
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -203,7 +203,53 @@ namespace MdmSim
         void SetSiEHitEDepExp(std::vector<G4double> &v) { fSiEHitEDepExp = v; };
         void SetSiEHitTimeExp(std::vector<G4double> &v) { fSiEHitTimeExp = v; };
 
+        // Coincidence bookkeeping: track IDs of the tagged particles (see
+        // TrackRole) and per-event detector flags matched by track ID.
+        void ResetCoincidence()
+        {
+            fAlpha1TrackId = -1;
+            fAlpha2TrackId = -1;
+            fGammaTrackId = -1;
+            fReactionConeTries = 0;
+            fAlpha1AtMdm = false;
+            fAlpha1AtPpacs = false;
+            fAlpha2AtS2 = false;
+            fAlpha2S2EDep = 0.;
+            fAlpha1S2EDep = 0.;
+            fGammaAtNaI = false;
+            fNaIEDepTotal = 0.;
+            fTripleCoincidence = false;
+        }
+        void SetAlpha1TrackId(G4int id) { fAlpha1TrackId = id; };
+        void SetAlpha2TrackId(G4int id) { fAlpha2TrackId = id; };
+        void SetGammaTrackId(G4int id) { fGammaTrackId = id; };
+        G4int GetAlpha1TrackId() const { return fAlpha1TrackId; };
+        G4int GetAlpha2TrackId() const { return fAlpha2TrackId; };
+        G4bool GetGammaGenerated() const { return fGammaGenerated; };
+        void SetReactionConeTries(G4long n) { fReactionConeTries = n; };
+        void SetAlpha1AtMdm(G4bool v) { fAlpha1AtMdm = v; };
+        void SetAlpha1AtPpacs(G4bool v) { fAlpha1AtPpacs = v; };
+        void SetAlpha2AtS2(G4bool v) { fAlpha2AtS2 = v; };
+        void SetAlpha2S2EDep(G4double v) { fAlpha2S2EDep = v; };
+        void SetAlpha1S2EDep(G4double v) { fAlpha1S2EDep = v; };
+        void SetGammaAtNaI(G4bool v) { fGammaAtNaI = v; };
+        void SetNaIEDepTotal(G4double v) { fNaIEDepTotal = v; };
+        void SetTripleCoincidence(G4bool v) { fTripleCoincidence = v; };
+
     private:
+        G4int fAlpha1TrackId = -1;
+        G4int fAlpha2TrackId = -1;
+        G4int fGammaTrackId = -1;
+        G4long fReactionConeTries = 0;
+        G4bool fAlpha1AtMdm = false;
+        G4bool fAlpha1AtPpacs = false;
+        G4bool fAlpha2AtS2 = false;
+        G4double fAlpha2S2EDep = 0.;
+        G4double fAlpha1S2EDep = 0.;
+        G4bool fGammaAtNaI = false;
+        G4double fNaIEDepTotal = 0.;
+        G4bool fTripleCoincidence = false;
+
         static Analysis *fInstance;
         G4bool fFactoryOn;
         TFile *fFile = nullptr;

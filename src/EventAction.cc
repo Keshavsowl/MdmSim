@@ -55,6 +55,7 @@ namespace MdmSim
 	analysis->ResetAlpha1Generated();
 	analysis->ResetAlpha2Generated();
 	analysis->ResetGammaGenerated();
+	analysis->ResetCoincidence();
 
         G4SDManager *sdManager = G4SDManager::GetSDMpointer();
         //fHCID_SiDetectorDeltaE = sdManager->GetCollectionID("SiDetectorDeltaEHitsCollection");
@@ -821,6 +822,51 @@ namespace MdmSim
         analysis->SetPpac2HitLocalMomentumX(ppac2HitLocalMomentumX);
         analysis->SetPpac2HitLocalMomentumY(ppac2HitLocalMomentumY);
         analysis->SetPpac2HitLocalMomentumZ(ppac2HitLocalMomentumZ);
+
+        //
+        // Coincidence flags, matched to the tagged particles by track ID
+        //   alpha1 @ MDM : alpha1 crosses the focal plane (AtPpacs: and both PPACs)
+        //   alpha2 @ S2  : alpha2 deposits more than kS2ThresholdMeV in the S2 layers
+        //   gamma @ NaI  : total NaI deposit above kNaIThresholdMeV in an event with
+        //                  a decay gamma (charged products cannot reach the NaI crystals)
+        constexpr G4double kS2ThresholdMeV = 0.1;
+        constexpr G4double kNaIThresholdMeV = 0.1;
+        const G4int alpha1TrackId = analysis->GetAlpha1TrackId();
+        const G4int alpha2TrackId = analysis->GetAlpha2TrackId();
+        const auto hasTrack = [](PpacHitsCollection *hc, G4int trackId)
+        {
+            if (!hc || trackId < 0)
+                return false;
+            for (size_t i = 0; i < hc->GetSize(); i++)
+                if ((*hc)[i]->GetTrackID() == trackId)
+                    return true;
+            return false;
+        };
+        const auto s2EDep = [&](G4int trackId)
+        {
+            G4double eDep = 0.;
+            for (G4int i = 0; trackId >= 0 && i < nofHitsSiDetectorE; i++)
+                if ((*hcSiDetectorE)[i]->GetTrackID() == trackId)
+                    eDep += (*hcSiDetectorE)[i]->GetEnergyDeposit();
+            return eDep / MeV;
+        };
+        G4double naiEDepTotal = 0.;
+        for (const G4double eDep : naiEDep)
+            naiEDepTotal += eDep / MeV;
+
+        const G4bool alpha1AtMdm = hasTrack(hcRaytraceFocalPlane, alpha1TrackId);
+        const G4bool alpha1AtPpacs = hasTrack(hcPpac1, alpha1TrackId) && hasTrack(hcPpac2, alpha1TrackId);
+        const G4double alpha2S2EDep = s2EDep(alpha2TrackId);
+        const G4bool alpha2AtS2 = alpha2S2EDep > kS2ThresholdMeV;
+        const G4bool gammaAtNaI = analysis->GetGammaGenerated() && naiEDepTotal > kNaIThresholdMeV;
+        analysis->SetAlpha1AtMdm(alpha1AtMdm);
+        analysis->SetAlpha1AtPpacs(alpha1AtPpacs);
+        analysis->SetAlpha1S2EDep(s2EDep(alpha1TrackId));
+        analysis->SetAlpha2AtS2(alpha2AtS2);
+        analysis->SetAlpha2S2EDep(alpha2S2EDep);
+        analysis->SetGammaAtNaI(gammaAtNaI);
+        analysis->SetNaIEDepTotal(naiEDepTotal);
+        analysis->SetTripleCoincidence(alpha1AtMdm && alpha2AtS2 && gammaAtNaI);
 
         //
         // Fill the trees

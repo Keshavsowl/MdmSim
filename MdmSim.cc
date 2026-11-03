@@ -387,6 +387,13 @@ int main(int argc, char **argv)
             reactionParameters["HeavyProductA"] = config.at("ReactionHeavyA").get<G4double>();
             reactionParameters["HeavyProductCharge"] = config.at("ReactionHeavyCharge").get<G4double>();
             reactionParameters["HeavyProductExMeV"] = config.at("ReactionHeavyExMeV").get<G4double>();
+            // Optional: restrict the light product to a cone around the MDM axis
+            // (0 = isotropic CM emission, the default).
+            const G4double lightConeHalfAngle = config.value("ReactionLightConeHalfAngleInDeg", 0.0);
+            if (lightConeHalfAngle < 0. || lightConeHalfAngle > 180.)
+                throw ConfigurationError("ReactionLightConeHalfAngleInDeg must satisfy 0 <= angle <= 180.\nUnit: deg.");
+            reactionParameters["LightConeHalfAngleInDeg"] = lightConeHalfAngle;
+            reactionParameters["MdmAngleInDeg"] = config.at("MdmAngleInDeg").get<G4double>();
 
             detectorParameters["ReactionLightZ"] = reactionParameters["LightProductZ"];
             detectorParameters["ReactionLightA"] = reactionParameters["LightProductA"];
